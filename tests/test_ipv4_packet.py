@@ -1,6 +1,6 @@
 import socket
 from unittest import TestCase
-from port_scanner.ip_packet import IpPacket
+from port_scanner.layers.ip.ip_packet import IpPacket
 
 """
 Hex dump of IP packet with the following properties:
