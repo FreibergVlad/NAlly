@@ -1,3 +1,6 @@
+from port_scanner.utils.utils import Utils
+
+
 class TcpControlBits:
     """
     Represents 9 TCP control flags, can be used for storing, setting or retrieving flags
@@ -83,7 +86,7 @@ class TcpControlBits:
         :param int bits: integer which represents bit flags
         :return: TcpControlBits instance
         """
-        is_flag_set: callable = TcpControlBits.__is_flag_set
+        is_flag_set: callable = Utils.is_bit_set
         return TcpControlBits(
             is_flag_set(bits, TcpControlBits.NS),
             is_flag_set(bits, TcpControlBits.CWR),
@@ -103,11 +106,7 @@ class TcpControlBits:
         :param int flag_mask: bit mask associated with flag
         :return: True if flag is set, False otherwise
         """
-        return TcpControlBits.__is_flag_set(self.__flags, flag_mask)
-
-    @staticmethod
-    def __is_flag_set(bits: int, flag_mask: int) -> bool:
-        return bits & flag_mask != 0
+        return Utils.is_bit_set(self.__flags, flag_mask)
 
     def __set_flag(self, flag_mask: int, value: bool):
         """
@@ -116,7 +115,4 @@ class TcpControlBits:
         :param int flag_mask: bit mask associated with flag
         :param bool value: value which flag should be set to
         """
-        if value:  # bit is 1
-            self.__flags = self.__flags | flag_mask
-        else:  # bit is 0
-            self.__flags = self.__flags & ~flag_mask
+        self.__flags = Utils.set_bit(self.__flags, flag_mask, value)
