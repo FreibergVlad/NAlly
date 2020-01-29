@@ -36,3 +36,13 @@ class TestTcpControlBits(TestCase):
     def test_flags_none_set(self):
         tcp_control_flags = TcpControlBits()
         self.assertEqual(0, tcp_control_flags.flags)
+
+    def test_from_int(self):
+        flags_syn = TcpControlBits.from_int(self.FLAGS_SYN)
+        self.assertEqual(self.FLAGS_SYN, flags_syn.flags)
+
+        flags_psh_ack = TcpControlBits.from_int(self.FLAGS_PSH_ACK)
+        self.assertEqual(self.FLAGS_PSH_ACK, flags_psh_ack.flags)
+
+        flags_all = TcpControlBits.from_int(self.FLAGS_ALL)
+        self.assertEqual(self.FLAGS_ALL, flags_all.flags)

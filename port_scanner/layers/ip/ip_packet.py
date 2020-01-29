@@ -41,11 +41,6 @@ class IpPacket:
         self.__protocol = protocol
 
     def pack(self) -> bytes:
-        """
-        Converts object to binary representation available
-        for sending via the network
-        :return:
-        """
         header_fields = [
             self.IP_V4_VER_IHL,
             self.__type_of_service,
