@@ -1,7 +1,8 @@
+from port_scanner.utils.bit_flags import BitFlags
 from port_scanner.utils.utils import Utils
 
 
-class TcpControlBits:
+class TcpControlBits(BitFlags):
     """
     Represents 9 TCP control flags, can be used for storing, setting or retrieving flags
     """
@@ -58,25 +59,16 @@ class TcpControlBits:
             and others when it is clear
         :param bool fin: means that current packet is the last packet from sender
         """
-        self.__flags = 0
-        self.__set_flag(self.NS, ns)
-        self.__set_flag(self.CWR, cwr)
-        self.__set_flag(self.ECE, ece)
-        self.__set_flag(self.URG, urg)
-        self.__set_flag(self.ACK, ack)
-        self.__set_flag(self.PSH, psh)
-        self.__set_flag(self.RST, rst)
-        self.__set_flag(self.SYN, syn)
-        self.__set_flag(self.FIN, fin)
-
-    @property
-    def flags(self):
-        """
-        9 bits integer representation of TCP control flags
-
-        :return: 9 bits integer representation of TCP control flags
-        """
-        return self.__flags
+        super().__init__()
+        self.set_flag(self.NS, ns)
+        self.set_flag(self.CWR, cwr)
+        self.set_flag(self.ECE, ece)
+        self.set_flag(self.URG, urg)
+        self.set_flag(self.ACK, ack)
+        self.set_flag(self.PSH, psh)
+        self.set_flag(self.RST, rst)
+        self.set_flag(self.SYN, syn)
+        self.set_flag(self.FIN, fin)
 
     @staticmethod
     def from_int(bits: int):
@@ -98,21 +90,3 @@ class TcpControlBits:
             is_flag_set(bits, TcpControlBits.SYN),
             is_flag_set(bits, TcpControlBits.FIN)
         )
-
-    def is_flag_set(self, flag_mask: int) -> bool:
-        """
-        Checks if TCP control flag is set
-
-        :param int flag_mask: bit mask associated with flag
-        :return: True if flag is set, False otherwise
-        """
-        return Utils.is_bit_set(self.__flags, flag_mask)
-
-    def __set_flag(self, flag_mask: int, value: bool):
-        """
-        Sets TCP control flag using the bit mask to 1 or 0
-
-        :param int flag_mask: bit mask associated with flag
-        :param bool value: value which flag should be set to
-        """
-        self.__flags = Utils.set_bit(self.__flags, flag_mask, value)

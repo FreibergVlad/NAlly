@@ -5,14 +5,11 @@ from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
 
 class TestTcpControlBits(TestCase):
 
-    """Only PSH and ACK flags set """
-    FLAGS_PSH_ACK = 0b11000
+    FLAGS_PSH_ACK = 0b11000  # only PSH and ACK flags set
 
-    """ All flags set """
-    FLAGS_ALL = 0b111111111
+    FLAGS_ALL = 0b111111111  # all flags set
 
-    """ Only SYN flag set """
-    FLAGS_SYN = 0b000000010
+    FLAGS_SYN = 0b000000010  # only SYN flag set
 
     def test_flags_all_set(self):
         tcp_control_flags = TcpControlBits(
