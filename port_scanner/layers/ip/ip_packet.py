@@ -2,6 +2,8 @@ import random
 import struct
 import socket
 
+from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
+
 
 class IpPacket:
 
@@ -12,7 +14,7 @@ class IpPacket:
     IP_V4_HEADER_LENGTH_BYTES = IP_V4_HEADER_LENGTH * 4
     IP_V4_VER_IHL = socket.IPPROTO_IPIP << 4 | IP_V4_HEADER_LENGTH
     IP_V4_TYPE_OF_SERVICE = 0b000000
-    IP_V4_FLAGS = 0b0100000000000000
+    IP_V4_FLAGS = IpFragmentationFlags(df=True)
     IP_V4_TTL = 64
     IP_V4_ID_LENGTH = 16
 
@@ -23,7 +25,8 @@ class IpPacket:
             payload: bytes,
             type_of_service: int = IP_V4_TYPE_OF_SERVICE,
             identification: int = None,
-            flags: int = IP_V4_FLAGS,
+            flags: IpFragmentationFlags = IP_V4_FLAGS,
+            fragment_offset: int = 0,
             ttl: int = IP_V4_TTL,
             protocol: int = socket.IPPROTO_TCP
     ):
@@ -37,16 +40,21 @@ class IpPacket:
             identification = self.__get_fragment_id()
         self.__identification = identification
         self.__flags = flags
+        self.__fragment_offset = fragment_offset
         self.__ttl = ttl
         self.__protocol = protocol
 
     def pack(self) -> bytes:
+
+        # fragmentation flags should take first 3 bits, next 13 bits is fragment offset
+        flags_fragment_offset = self.__flags.flags << 13 | self.__fragment_offset
+
         header_fields = [
             self.IP_V4_VER_IHL,
             self.__type_of_service,
             self.__total_length,
             self.__identification,
-            self.__flags,
+            flags_fragment_offset,
             self.__ttl,
             self.__protocol,
             0,  # placeholder for checksum

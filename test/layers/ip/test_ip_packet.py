@@ -13,7 +13,7 @@ Hex dump of IP packet with the following properties:
     source IP = 93.186.225.198
     destination IP = 192.168.1.16
 """
-HEX_DUMP_1 = "45:00:01:89:79:e5:40:00:fc:06:02:50:5d:ba:e1:c6:c0:a8:01:10"
+HEX_DUMP_1 = "4500018979e54000fc0602505dbae1c6c0a80110"
 
 """
 Hex dump of IP packet with the following properties:
@@ -26,7 +26,7 @@ Hex dump of IP packet with the following properties:
     source IP = 192.168.0.102
     destination IP = 192.168.0.1
 """
-HEX_DUMP_2 = "45:00:00:44:6b:90:40:00:40:11:4d:61:c0:a8:00:66:c0:a8:00:01"
+HEX_DUMP_2 = "450000446b90400040114d61c0a80066c0a80001"
 
 
 class TestIpv4Packet(TestCase):
@@ -39,7 +39,7 @@ class TestIpv4Packet(TestCase):
             ttl=252,
             identification=31205
         )
-        hex_dump_1 = ip_packet_1.pack().hex(":")
+        hex_dump_1 = ip_packet_1.pack().hex()
         self.assertEqual(HEX_DUMP_1, hex_dump_1)
 
         ip_packet_2 = IpPacket(
@@ -50,5 +50,5 @@ class TestIpv4Packet(TestCase):
             identification=27536,
             protocol=socket.IPPROTO_UDP
         )
-        hex_dump_2 = ip_packet_2.pack().hex(":")
+        hex_dump_2 = ip_packet_2.pack().hex()
         self.assertEqual(HEX_DUMP_2, hex_dump_2)
