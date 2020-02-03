@@ -38,7 +38,7 @@ class IpPacket:
         self.__ttl = ttl
         self.__protocol = protocol
 
-    def pack(self) -> bytes:
+    def to_bytes(self) -> bytes:
 
         # fragmentation flags takes first 3 bits, next 13 bits is fragment offset
         flags_fragment_offset = self.__flags.flags << 13 | self.__fragment_offset

@@ -77,7 +77,7 @@ class TestIpv4Packet(TestCase):
             ttl=252,
             identification=31205
         )
-        hex_dump_1 = ip_packet_1.pack().hex()
+        hex_dump_1 = ip_packet_1.to_bytes().hex()
         self.assertEqual(PACKET_DUMP_1, hex_dump_1)
 
         ip_packet_2 = IpPacket(
@@ -88,7 +88,7 @@ class TestIpv4Packet(TestCase):
             identification=27536,
             protocol=socket.IPPROTO_UDP
         )
-        hex_dump_2 = ip_packet_2.pack().hex()
+        hex_dump_2 = ip_packet_2.to_bytes().hex()
         self.assertEqual(PACKET_DUMP_2, hex_dump_2)
 
         ip_packet_3 = IpPacket(
@@ -101,7 +101,7 @@ class TestIpv4Packet(TestCase):
             fragment_offset=925,
             protocol=socket.IPPROTO_ICMP
         )
-        hex_dump_3 = ip_packet_3.pack().hex()
+        hex_dump_3 = ip_packet_3.to_bytes().hex()
         self.assertEqual(PACKET_DUMP_3, hex_dump_3)
 
         ip_packet_4 = IpPacket(
@@ -112,7 +112,7 @@ class TestIpv4Packet(TestCase):
             payload=bytearray(0),
             identification=29320
         )
-        hex_dump_4 = ip_packet_4.pack().hex()
+        hex_dump_4 = ip_packet_4.to_bytes().hex()
         self.assertEqual(PACKET_DUMP_4, hex_dump_4)
 
         ip_packet_5 = IpPacket(
@@ -124,7 +124,7 @@ class TestIpv4Packet(TestCase):
             payload=bytearray(0),
             identification=55463
         )
-        hex_dump_5 = ip_packet_5.pack().hex()
+        hex_dump_5 = ip_packet_5.to_bytes().hex()
         self.assertEqual(PACKET_DUMP_5, hex_dump_5)
 
     def test_packet_creation_with_invalid_fields(self):
