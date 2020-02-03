@@ -5,6 +5,13 @@ from port_scanner.layers.ip.ip_utils import IpUtils
 
 class TestIpUtils(TestCase):
 
+    HEADER_DUMPS_TO_CHECKSUM = {
+        "450000347a6b0000fc060000d83ace0ec0a80108": 0xdc5e,
+        "450000344f714000fc06000068517956c0a80108": 0x8bfa,
+        "450000424655400040110000c0a80108c0a80101": 0x70fc,
+        "45000034fe7a4000fc0600008ac951c7c0a80108": 0xe207
+    }
+
     def test_validate_fragment_offset(self):
         self.assertEqual(0, IpUtils.validate_fragment_offset(0))
 
@@ -32,6 +39,12 @@ class TestIpUtils(TestCase):
         self.assertRaises(ValueError, IpUtils.validate_packet_length, 65536)
 
         self.assertEqual(65535, IpUtils.validate_packet_length(65535))
+
+    def test_calc_ip_checksum(self):
+        for dump, checksum in self.HEADER_DUMPS_TO_CHECKSUM.items():
+            header_bytes = bytearray.fromhex(dump)
+            self.assertEqual(IpUtils.calc_ip_checksum(header_bytes), checksum)
+
 
 
 

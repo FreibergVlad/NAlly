@@ -65,7 +65,7 @@ class IpPacket:
         struct.pack_into(self.IP_V4_HEADER_FORMAT, header_bytes, 0, *header_fields)
 
         # calculate checksum
-        checksum = self.__gen_checksum(header_bytes)
+        checksum = IpUtils.calc_ip_checksum(header_bytes)
         # split 16-bits checksum into two 8-bits values
         checksum_bytes = checksum.to_bytes(2, byteorder="big")
         # checksum takes 10-th and 11-th bytes of the header (counting from 0)
@@ -74,14 +74,3 @@ class IpPacket:
         header_bytes[11] = checksum_bytes[1]
 
         return bytes(header_bytes)
-
-    @staticmethod
-    def __gen_checksum(header_bytes: bytearray) -> int:
-        checksum = 0
-        for i in range(0, len(header_bytes), 2):
-            # pair two bytes into 16-bits value
-            paired_bytes = (header_bytes[i] << 8) + header_bytes[i + 1]
-            checksum += paired_bytes
-        checksum += (checksum >> 16)
-        checksum = ~checksum & 0xffff
-        return checksum
