@@ -11,6 +11,17 @@ class IpDiffServiceValues(IntEnum):
     DiffService uses a 6-bit differentiated services code point (DSCP) in the 8-bit differentiated services
     field (DS field) in the IP header for packet classification purposes. The DS field replaces the outdated
     IPv4 TOS field.
+
+    This class stores values for the following commonly defined per-hop behaviors:
+        * Default Forwarding (DF) PHB — which is typically best-effort traffic
+        * Expedited Forwarding (EF) PHB — dedicated to low-loss, low-latency traffic
+        * Assured Forwarding (AF) PHB — gives assurance of delivery under prescribed conditions
+        * Class Selector (CS) PHBs — which maintain backward compatibility with the IP precedence field.
+
+    See the following RFC documents for more details:
+        * https://tools.ietf.org/html/rfc2474
+        * https://tools.ietf.org/html/rfc2597
+        * https://tools.ietf.org/html/rfc3246
     """
 
     DEFAULT = 0
