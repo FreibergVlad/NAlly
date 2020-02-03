@@ -1,9 +1,10 @@
 import socket
 from unittest import TestCase
 
+from port_scanner.layers.ip.ip_diff_service_values import IpDiffServiceValues
+from port_scanner.layers.ip.ip_ecn_values import IpEcnValues
 from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
 from port_scanner.layers.ip.ip_packet import IpPacket
-
 
 #
 #  DSCP = 0
@@ -29,18 +30,41 @@ PACKET_DUMP_1 = "4500018979e54000fc0602505dbae1c6c0a80110"
 #
 PACKET_DUMP_2 = "450000446b90400040114d61c0a80066c0a80001"
 
-
 #
 #  DSCP = 0
 #  total length = 1500 bytes (20 + 1480)
 #  identification = 57527
 #  flags = 0x239d (MF set and fragment offset is 925)
 #  ttl = 64
-#  protocol = ICP (1)
+#  protocol = ICMP (1)
 #  source IP = 10.10.128.44
 #  destination IP = 216.58.209.14
 #
 PACKET_DUMP_3 = "450005dce0b7239d40013d4d0a0a802cd83ad10e"
+
+#
+#  DSCP = 0xb8 (EF PHB + Non-ECN)
+#  total length = 20 bytes
+#  identification = 29320
+#  flags = 0
+#  ttl = 64
+#  protocol = TCP (6)
+#  source IP = 192.168.1.8
+#  destination IP = 8.8.8.8
+#
+PACKET_DUMP_4 = "45b8001472880000400635e4c0a8010808080808"
+
+#
+#  DSCP = 0xbb (EF PHB + CE)
+#  total length = 20 bytes
+#  identification = 55463
+#  flags = 0
+#  ttl = 64
+#  protocol = TCP (6)
+#  source IP = 192.168.1.8
+#  destination IP = 8.8.8.8
+#
+PACKET_DUMP_5 = "45bb0014d8a700004006cfc1c0a8010808080808"
 
 
 class TestIpv4Packet(TestCase):
@@ -79,6 +103,29 @@ class TestIpv4Packet(TestCase):
         )
         hex_dump_3 = ip_packet_3.pack().hex()
         self.assertEqual(PACKET_DUMP_3, hex_dump_3)
+
+        ip_packet_4 = IpPacket(
+            source_addr_str="192.168.1.8",
+            dest_addr_str="8.8.8.8",
+            dscp=IpDiffServiceValues.EF,
+            flags=IpFragmentationFlags(),
+            payload=bytearray(0),
+            identification=29320
+        )
+        hex_dump_4 = ip_packet_4.pack().hex()
+        self.assertEqual(PACKET_DUMP_4, hex_dump_4)
+
+        ip_packet_5 = IpPacket(
+            source_addr_str="192.168.1.8",
+            dest_addr_str="8.8.8.8",
+            dscp=IpDiffServiceValues.EF,
+            ecn=IpEcnValues.CE,
+            flags=IpFragmentationFlags(),
+            payload=bytearray(0),
+            identification=55463
+        )
+        hex_dump_5 = ip_packet_5.pack().hex()
+        self.assertEqual(PACKET_DUMP_5, hex_dump_5)
 
     def test_packet_creation_with_invalid_fields(self):
         # pass too long payload

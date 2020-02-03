@@ -1,6 +1,8 @@
 import struct
 import socket
 
+from port_scanner.layers.ip.ip_diff_service_values import IpDiffServiceValues
+from port_scanner.layers.ip.ip_ecn_values import IpEcnValues
 from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
 from port_scanner.layers.ip.ip_utils import IpUtils
 
@@ -9,8 +11,6 @@ class IpPacket:
 
     IP_V4_HEADER_FORMAT = "!BBHHHBBH4s4s"
 
-    IP_V4_TYPE_OF_SERVICE = 0b000000
-    IP_V4_FLAGS_DF = IpFragmentationFlags(df=True)
     IP_V4_DEFAULT_TTL = 64
 
     def __init__(
@@ -18,9 +18,10 @@ class IpPacket:
             source_addr_str: str,
             dest_addr_str: str,
             payload: bytes,
-            type_of_service: int = IP_V4_TYPE_OF_SERVICE,
+            dscp: IpDiffServiceValues = IpDiffServiceValues.DEFAULT,
+            ecn: IpEcnValues = IpEcnValues.NON_ECT,
             identification: int = None,
-            flags: IpFragmentationFlags = IP_V4_FLAGS_DF,
+            flags: IpFragmentationFlags = IpFragmentationFlags(df=True),
             fragment_offset: int = 0,
             ttl: int = IP_V4_DEFAULT_TTL,
             protocol: int = socket.IPPROTO_TCP
@@ -28,7 +29,8 @@ class IpPacket:
         self.__source_addr = socket.inet_aton(source_addr_str)
         self.__dest_addr = socket.inet_aton(dest_addr_str)
         self.__payload = payload
-        self.__type_of_service = type_of_service
+        self.__dscp = dscp
+        self.__ecn = ecn
         self.__total_length = IpUtils.validate_packet_length(IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(self.__payload))
         self.__identification = IpUtils.validate_or_gen_packet_id(identification)
         self.__flags = flags
@@ -38,12 +40,15 @@ class IpPacket:
 
     def pack(self) -> bytes:
 
-        # fragmentation flags should take first 3 bits, next 13 bits is fragment offset
+        # fragmentation flags takes first 3 bits, next 13 bits is fragment offset
         flags_fragment_offset = self.__flags.flags << 13 | self.__fragment_offset
+
+        # DSCP value takes first 6 bits, the next 2 ones is ECN
+        dscp_ecn = self.__dscp << 2 | self.__ecn
 
         header_fields = [
             IpUtils.IP_V4_VER_IHL,
-            self.__type_of_service,
+            dscp_ecn,
             self.__total_length,
             self.__identification,
             flags_fragment_offset,
@@ -59,6 +64,7 @@ class IpPacket:
         # pack header without checksum to the buffer
         struct.pack_into(self.IP_V4_HEADER_FORMAT, header_bytes, 0, *header_fields)
 
+        # calculate checksum
         checksum = self.__gen_checksum(header_bytes)
         # split 16-bits checksum into two 8-bits values
         checksum_bytes = checksum.to_bytes(2, byteorder="big")
