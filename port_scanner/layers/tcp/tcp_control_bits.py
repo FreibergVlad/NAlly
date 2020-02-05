@@ -90,3 +90,9 @@ class TcpControlBits(BitFlags):
             is_flag_set(bits, TcpControlBits.SYN),
             is_flag_set(bits, TcpControlBits.FIN)
         )
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TcpControlBits):
+            return self.flags == other.flags
+
+

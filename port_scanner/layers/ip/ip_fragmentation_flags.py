@@ -34,3 +34,9 @@ class IpFragmentationFlags(BitFlags):
         df_flag = Utils.is_bit_set(bits, IpFragmentationFlags.DF)
         mf_flag = Utils.is_bit_set(bits, IpFragmentationFlags.MF)
         return IpFragmentationFlags(mf=mf_flag, df=df_flag)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, IpFragmentationFlags):
+            return self.flags == other.flags
+
+
