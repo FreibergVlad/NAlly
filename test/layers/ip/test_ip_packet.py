@@ -93,7 +93,7 @@ class TestIpv4Packet(TestCase):
             payload=bytearray(65535)
         )
 
-        # pass to long Identification field
+        # pass too long Identification field
         self.assertRaises(
             ValueError,
             IpPacket,
@@ -103,7 +103,7 @@ class TestIpv4Packet(TestCase):
             identification=pow(2, 16)
         )
 
-        # pass to long Identification field
+        # pass too long Identification field
         self.assertRaises(
             ValueError,
             IpPacket,

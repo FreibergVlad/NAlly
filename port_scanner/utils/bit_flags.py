@@ -14,7 +14,7 @@ class BitFlags(ABC):
         raise NotImplementedError
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         return self._flags
 
     def is_flag_set(self, flag_mask: int) -> bool:
