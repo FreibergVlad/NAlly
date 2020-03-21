@@ -7,7 +7,7 @@ from port_scanner.layers.tcp.tcp_options import TcpOptions
 
 class TcpPacket:
 
-    TCP_HEADER_FORMAT = "!HHIIHHHHI"
+    TCP_HEADER_FORMAT = "!HHIIHHHH"
 
     def __init__(
             self,
@@ -33,8 +33,11 @@ class TcpPacket:
 
     def to_bytes(self):
         options_bytes = self.__options.to_bytes()
+        # make sure that options bit length is divisible by 32
+        # should not fail here since all required padding already performed in TcpOptions class
+        assert len(options_bytes) % 4 == 0
         # calculate data offset value in 32-bits words
-        data_offset = 5 + len(options_bytes) // 4  # TODO take care about options
+        data_offset = 5 + len(options_bytes) // 4
         # concat 4 data offset bits + 3 reserved zero bits + 9 control bit flags
         data_offset_flags = data_offset << 12 | self.__flags.flags
         header = struct.pack(
@@ -47,9 +50,8 @@ class TcpPacket:
             self.__win_size,
             0,  # TODO calculate checksum
             self.__urg_pointer,
-            options_bytes
         )
-        return header + self.__payload
+        return header + options_bytes + self.__payload
 
     @staticmethod
     def from_bytes():

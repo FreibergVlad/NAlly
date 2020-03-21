@@ -5,43 +5,42 @@ from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
 from port_scanner.layers.tcp.tcp_options import TcpOptions
 
 #
-# Source port = 35654
-# Destination port = 443
-# Sequence number = 0
-# Acknowledgment number = 0
-# Flags = 0x002 (SYN)
-# Window size = 64240
-# Checksum = 0xc3c1
+# Source port = 443
+# Destination port = 50012
+# Sequence number = 3102652131
+# Acknowledgment number = 3461676770
+# Flags = 0x010 (ACK)
+# Window size = 356
+# Checksum = 0xc4ee
 # Urgent pointer = 0
 # Options:
-#   MSS = 1460
-#   SACK permitted
-#   Timestamps = 3046248901 and 0
-#   Nop
-#   Window scale = 7
+#   NOP
+#   NOP
+#   Timestamps = 3293157569 and 235644918
 #
 
-PACKET_DUMP_1 = "8b4601bb8d6e6dd100000000a002faf0c3c10000020405b40402080ab59211c50000000001030307"
+PACKET_DUMP_1 = "01bbc35cb8eeb6e3ce54fee280100164c4ee00000101080ac44998c10e0ba7f6"
 
 
 class TestTcpPacket(TestCase):
 
     def test_to_bytes(self):
-        tcp_options = TcpOptions()\
-            .set_mss(1460)\
-            .set_sack_permitted()\
-            .set_timestamps(3046248901, 0)\
-            .set_nop()\
-            .set_window_scale(7)
+        tcp_options = TcpOptions([
+            TcpOptions.NOP,
+            TcpOptions.NOP,
+            (TcpOptions.TIMESTAMPS, [3293157569, 235644918])
+        ])
 
-        tcp_packet1 = TcpPacket(
-            source_port=35654,
-            dest_port=443,
-            sequence_number=0,
-            ack_number=0,
-            flags=TcpControlBits(syn=True),
-            win_size=64240,
+        tcp_packet = TcpPacket(
+            source_port=443,
+            dest_port=50012,
+            sequence_number=3102652131,
+            ack_number=3461676770,
+            flags=TcpControlBits(ack=True),
+            win_size=356,
             urg_pointer=0,
             options=tcp_options,
             payload=bytearray(0)
         )
+
+        self.assertEqual(PACKET_DUMP_1, tcp_packet.to_bytes().hex())
