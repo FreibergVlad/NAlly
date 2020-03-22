@@ -5,9 +5,10 @@ from port_scanner.layers.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.ip.ip_ecn_values import IpEcnValues
 from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
 from port_scanner.layers.ip.ip_utils import IpUtils
+from port_scanner.layers.packet import Packet
 
 
-class IpPacket:
+class IpPacket(Packet):
 
     IP_V4_HEADER_FORMAT = "!BBHHHBBH4s4s"
 
@@ -17,7 +18,7 @@ class IpPacket:
             self,
             source_addr_str: str,
             dest_addr_str: str,
-            payload: bytes,
+            payload: bytes = bytearray(),
             dscp: IpDiffServiceValues = IpDiffServiceValues.DEFAULT,
             ecn: IpEcnValues = IpEcnValues.NON_ECT,
             identification: int = None,
@@ -26,13 +27,14 @@ class IpPacket:
             ttl: int = IP_V4_DEFAULT_TTL,
             protocol: int = socket.IPPROTO_TCP
     ):
+        super().__init__()
         self.__source_addr = socket.inet_aton(source_addr_str)
         self.__dest_addr = socket.inet_aton(dest_addr_str)
-        self.__payload = payload
+        self._payload = payload
         self.__dscp = dscp
         self.__ecn = ecn
         self.__total_length = IpUtils.validate_packet_length(
-            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(self.__payload))
+            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(self._payload))
         self.__identification = IpUtils.validate_or_gen_packet_id(identification)
         self.__flags = flags
         self.__fragment_offset = IpUtils.validate_fragment_offset(fragment_offset)
@@ -111,7 +113,7 @@ class IpPacket:
         )
 
     @property
-    def source_adr(self) -> str:
+    def source_addr(self) -> str:
         return socket.inet_ntoa(self.__source_addr)
 
     @property
@@ -119,8 +121,12 @@ class IpPacket:
         return socket.inet_ntoa(self.__dest_addr)
 
     @property
-    def payload(self) -> bytes:
-        return self.__payload
+    def source_addr_raw(self) -> bytes:
+        return self.__source_addr
+
+    @property
+    def dest_addr_raw(self) -> bytes:
+        return self.__dest_addr
 
     @property
     def dscp(self) -> IpDiffServiceValues:
@@ -154,9 +160,16 @@ class IpPacket:
     def protocol(self) -> int:
         return self.__protocol
 
+    @Packet.payload.setter
+    def payload(self, payload: bytearray):
+        # since payload was changed, need to recalculate the Total Length header field
+        self.__total_length = IpUtils.validate_packet_length(
+            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(payload))
+        self._payload = payload
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, IpPacket):
-            return self.source_adr == other.source_adr and \
+            return self.source_addr == other.source_addr and \
                    self.dest_addr == other.dest_addr and \
                    self.payload == other.payload and \
                    self.dscp == other.dscp and \

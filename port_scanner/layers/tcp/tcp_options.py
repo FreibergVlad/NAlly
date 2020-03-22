@@ -3,6 +3,8 @@ from typing import Tuple
 
 import struct
 
+from port_scanner.layers.tcp.tcp_utils import TcpUtils
+
 
 class TcpOptions:
     """
@@ -24,8 +26,6 @@ class TcpOptions:
     SACK_PERMITTED = "SACK_OK"
     SACK = "SACK"
     TIMESTAMPS = "TIMESTAMPS"
-
-    MAX_OPTIONS_LENGTH_BYTES = 40
 
     #
     # Storage of supported options definitions. Option definition is a
@@ -118,7 +118,7 @@ class TcpOptions:
 
         # pad with zeros to make the bit length divisible by 32
         options_bytes += b"\x00" * (3 - ((len(options_bytes) + 3) % 4))
-        self.validate_options_length(len(options_bytes))
+        TcpUtils.validate_options_length(options_bytes)
         return options_bytes
 
     @staticmethod
@@ -129,7 +129,7 @@ class TcpOptions:
         :raises: ValueError: if options length is more that max allowed value
             (40 bytes) or options have incorrect format
         """
-        TcpOptions.validate_options_length(len(options_bytes))
+        TcpUtils.validate_options_length(options_bytes)
         index = 0
         options = []
         while index < len(options_bytes):
@@ -168,11 +168,6 @@ class TcpOptions:
     @property
     def options(self):
         return self.__options
-
-    @staticmethod
-    def validate_options_length(length):
-        if length > TcpOptions.MAX_OPTIONS_LENGTH_BYTES:
-            raise ValueError(f"Max options length is ${TcpOptions.MAX_OPTIONS_LENGTH_BYTES} got ${length}")
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TcpOptions):

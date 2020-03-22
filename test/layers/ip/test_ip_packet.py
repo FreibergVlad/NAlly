@@ -112,3 +112,13 @@ class TestIpv4Packet(TestCase):
             payload=bytearray(0),
             fragment_offset=pow(2, 13)
         )
+
+    def test_copy(self):
+        ip_packet_1 = IpPacket(
+            source_addr_str="192.168.1.8",
+            dest_addr_str="126.12.14.67",
+            payload=bytearray([0x58] * 5),
+            flags=IpFragmentationFlags(),
+            identification=39434
+        )
+        self.assertEqual(ip_packet_1, ip_packet_1.clone())

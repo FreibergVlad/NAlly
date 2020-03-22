@@ -1,6 +1,8 @@
 import random
 import socket
 
+from port_scanner.utils.utils import Utils
+
 
 class IpUtils:
     """
@@ -95,11 +97,4 @@ class IpUtils:
         """
         if header_bytes[10] != 0 or header_bytes[11] != 0:
             raise ValueError("10-th and 11-th bytes of header should be set to 0")
-        checksum = 0
-        for i in range(0, len(header_bytes), 2):
-            # pair two bytes into 16-bits value
-            paired_bytes = (header_bytes[i] << 8) + header_bytes[i + 1]
-            checksum += paired_bytes
-        checksum += (checksum >> 16)
-        checksum = ~checksum & 0xffff
-        return checksum
+        return Utils.calc_checksum(header_bytes)
