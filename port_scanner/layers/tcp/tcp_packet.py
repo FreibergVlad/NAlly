@@ -16,13 +16,13 @@ class TcpPacket(Packet):
             self,
             source_port: int,
             dest_port: int,
-            sequence_number: int,
-            ack_number: int,
-            flags: TcpControlBits,
-            win_size: int,
-            urg_pointer: int,
-            options: TcpOptions,
-            payload: bytearray
+            sequence_number: int = 0,
+            ack_number: int = 0,
+            flags: TcpControlBits = TcpControlBits(),
+            win_size: int = 65535,
+            urg_pointer: int = 0,
+            options: TcpOptions = TcpOptions(),
+            payload: bytearray = bytearray()
     ):
         super().__init__()
         self.__source_port = TcpUtils.validate_port_num(source_port)
@@ -41,7 +41,7 @@ class TcpPacket(Packet):
         # should not fail here since all required padding already performed in TcpOptions class
         assert len(options_bytes) % 4 == 0
         # calculate data offset value in 32-bits words
-        data_offset = 5 + len(options_bytes) // 4
+        data_offset = TcpUtils.TCP_HEADER_LENGTH + len(options_bytes) // 4
         # concat 4 data offset bits + 3 reserved zero bits + 9 control bit flags
         data_offset_flags = data_offset << 12 | self.__flags.flags
 
@@ -72,7 +72,7 @@ class TcpPacket(Packet):
         header_buffer[16] = checksum_bytes[0]
         header_buffer[17] = checksum_bytes[1]
 
-        return bytes(header_buffer) + options_bytes + self._payload
+        return TcpUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self._payload)
 
     def __get_pseudo_header(self, segment_len) -> bytes:
         if not isinstance(self.underlying_packet, IpPacket):
@@ -88,8 +88,46 @@ class TcpPacket(Packet):
         )
 
     @staticmethod
-    def from_bytes(bytes_packet: bytes):  # TODO implement from_bytes method
-        pass
+    def from_bytes(packet_bytes: bytes):
+        header_bytes = packet_bytes[:TcpUtils.TCP_HEADER_LENGTH_BYTES]
+        payload_and_options = packet_bytes[TcpUtils.TCP_HEADER_LENGTH_BYTES:]
+        header_fields = struct.unpack(TcpPacket.TCP_HEADER_FORMAT, header_bytes)
+
+        source_port = header_fields[0]
+        dest_port = header_fields[1]
+        seq_num = header_fields[2]
+        ack_num = header_fields[3]
+        data_offset_flags = header_fields[4]
+        win_size = header_fields[5]
+        # 6-th item is checksum, don't need to extract it, since it will be calculated later
+        urg_pointer = header_fields[7]
+
+        # take first 4 bits
+        data_offset = data_offset_flags >> 12
+        # take 5-th, 6-th, 7-th bits
+        reserved_bits = (data_offset_flags >> 9) & 7
+        if reserved_bits != 0:
+            raise ValueError("Reserved bits should be set to zero")
+        # take last 9 bits
+        flags = TcpControlBits.from_int(data_offset_flags & 511)
+
+        # compute options field length in bytes
+        options_len = (data_offset - TcpUtils.TCP_HEADER_LENGTH) * 4
+        options = TcpOptions.from_bytes(payload_and_options[:options_len])
+
+        payload = payload_and_options[options_len:]
+
+        return TcpPacket(
+            dest_port=dest_port,
+            source_port=source_port,
+            sequence_number=seq_num,
+            ack_number=ack_num,
+            flags=flags,
+            win_size=win_size,
+            urg_pointer=urg_pointer,
+            options=options,
+            payload=payload
+        )
 
     @property
     def source_port(self) -> int:

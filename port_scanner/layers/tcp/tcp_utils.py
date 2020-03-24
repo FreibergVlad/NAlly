@@ -10,6 +10,13 @@ class TcpUtils:
     TCP_HEADER_LENGTH = 5
     TCP_HEADER_LENGTH_BYTES = TCP_HEADER_LENGTH * 4
     TCP_OPTIONS_MAX_LENGTH_BYTES = 40
+    TCP_PACKET_MAX_LENGTH_BYTES = 65535
+
+    @staticmethod
+    def validate_packet_length(packet: bytes):
+        if len(packet) > TcpUtils.TCP_PACKET_MAX_LENGTH_BYTES:
+            raise ValueError(f"packet size can't be larger than ${TcpUtils.TCP_PACKET_MAX_LENGTH_BYTES} bytes")
+        return packet
 
     @staticmethod
     def validate_port_num(port):
