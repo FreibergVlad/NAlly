@@ -15,7 +15,7 @@ class TcpUtils:
     @staticmethod
     def validate_packet_length(packet: bytes):
         if len(packet) > TcpUtils.TCP_PACKET_MAX_LENGTH_BYTES:
-            raise ValueError(f"packet size can't be larger than ${TcpUtils.TCP_PACKET_MAX_LENGTH_BYTES} bytes")
+            raise ValueError(f"packet size can't be larger than {TcpUtils.TCP_PACKET_MAX_LENGTH_BYTES} bytes")
         return packet
 
     @staticmethod
@@ -28,7 +28,7 @@ class TcpUtils:
     def validate_options_length(options):
         length = len(options)
         if length > TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES:
-            raise ValueError(f"Max options length is ${TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES} got ${length}")
+            raise ValueError(f"Max options length is {TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES} got {length}")
 
     @staticmethod
     def calc_tcp_checksum(pseudo_header, header, payload):
@@ -45,9 +45,9 @@ class TcpUtils:
         :return: calculated checksum (16 bits value)
         """
         if len(pseudo_header) != TcpUtils.PSEUDO_HEADER_LENGTH_BYTES:
-            raise ValueError(f"Pseudo header length should be ${TcpUtils.PSEUDO_HEADER_LENGTH_BYTES} bytes")
+            raise ValueError(f"Pseudo header length should be {TcpUtils.PSEUDO_HEADER_LENGTH_BYTES} bytes")
         if len(header) != TcpUtils.TCP_HEADER_LENGTH_BYTES:
-            raise ValueError(f"Header length should be ${TcpUtils.TCP_HEADER_LENGTH_BYTES} bytes")
+            raise ValueError(f"Header length should be {TcpUtils.TCP_HEADER_LENGTH_BYTES} bytes")
         if header[16] != 0 or header[17] != 0:
             raise ValueError("16-th and 17-th bytes of header should be set to 0")
         return Utils.calc_checksum(pseudo_header + header + payload)

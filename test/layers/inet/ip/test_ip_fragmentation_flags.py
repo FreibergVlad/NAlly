@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
+from port_scanner.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
 
 
 class TestIpFragmentationFlags(TestCase):

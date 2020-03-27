@@ -15,7 +15,7 @@ class EthernetUtils:
     @staticmethod
     def validate_mac_length(mac: bytes):
         if len(mac) != EthernetUtils.MAC_LENGTH_BYTES:
-            raise ValueError(f"MAC address should be ${EthernetUtils.MAC_LENGTH_BYTES} bytes length")
+            raise ValueError(f"MAC address should be {EthernetUtils.MAC_LENGTH_BYTES} bytes length")
         return mac
 
     @staticmethod
@@ -26,7 +26,7 @@ class EthernetUtils:
     def validate_payload(payload_bytes: bytearray):
         if len(payload_bytes) > EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES:
             raise ValueError(f"Ethernet frame payload can't be greater than "
-                             f"${EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES} bytes")
+                             f"{EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES} bytes")
         return payload_bytes
 
 

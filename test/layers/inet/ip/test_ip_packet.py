@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from port_scanner.layers.ip.ip_diff_service_values import IpDiffServiceValues
-from port_scanner.layers.ip.ip_ecn_values import IpEcnValues
-from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
-from port_scanner.layers.ip.ip_packet import IpPacket
+from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
+from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
+from port_scanner.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
+from port_scanner.layers.inet.ip.ip_packet import IpPacket
 
 #
 #  DSCP = 0

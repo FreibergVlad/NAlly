@@ -68,21 +68,21 @@ class TcpOptions:
         for option in options:
             if isinstance(option, tuple):
                 if len(option) != 2:
-                    raise ValueError(f"Invalid option ${option}. Should a tuple with 2 elements (name, value)")
+                    raise ValueError(f"Invalid option {option}. Should a tuple with 2 elements (name, value)")
                 option_name = option[0]
                 if not isinstance(option_name, str):
-                    raise ValueError(f"Invalid option name ${option_name}. Should be a string")
+                    raise ValueError(f"Invalid option name {option_name}. Should be a string")
                 option_value = option[1]
                 if isinstance(option_value, list):
                     self.__options.append(option)
                 elif isinstance(option_value, int):
                     self.__options.append((option_name, [option_value]))
                 else:
-                    raise ValueError(f"Invalid option value ${option_value}. Should either a 'int' or a 'list[int]'")
+                    raise ValueError(f"Invalid option value {option_value}. Should either a 'int' or a 'list[int]'")
             elif isinstance(option, str):
                 self.__options.append((option, None))
             else:
-                raise ValueError(f"Invalid option ${option}. Should be either a 'Tuple[str, list|int]' or a 'str'")
+                raise ValueError(f"Invalid option {option}. Should be either a 'Tuple[str, list|int]' or a 'str'")
 
     def to_bytes(self) -> bytes:
         """
@@ -94,7 +94,7 @@ class TcpOptions:
         for option in self.__options:
             opt_name: str = option[0]
             if opt_name not in self.SUPPORTED_OPTIONS:
-                raise ValueError(f"Unknown option ${opt_name}")
+                raise ValueError(f"Unknown option {opt_name}")
             if opt_name == self.END_OF_OPTIONS:
                 options_bytes.append(0x00)
                 continue
@@ -135,7 +135,7 @@ class TcpOptions:
         while index < len(options_bytes):
             option_kind = options_bytes[index]
             if option_kind not in TcpOptions.OPTION_KINDS:
-                raise ValueError(f"Unknown option kind ${option_kind}")
+                raise ValueError(f"Unknown option kind {option_kind}")
             option_name = TcpOptions.OPTION_KINDS[option_kind]
             if option_name == TcpOptions.END_OF_OPTIONS:
                 break
@@ -145,7 +145,7 @@ class TcpOptions:
                 continue
             option_length = options_bytes[index + 1]
             if option_length < 2:
-                raise ValueError(f"Invalid option length ${option_length}")
+                raise ValueError(f"Invalid option length {option_length}")
             if option_length == 2:  # option length 2 means that no value is present
                 index += 2
                 options.append(option_name)
@@ -157,7 +157,7 @@ class TcpOptions:
                 option_format: str = f"!{len(option_value_bytes) // 4}I"
             option_value: tuple = struct.unpack_from(option_format, option_value_bytes)
             if len(option_value) == 0:
-                raise ValueError(f"Option value is empty. Option name: ${option_name}")
+                raise ValueError(f"Option value is empty. Option name: {option_name}")
             elif len(option_value) == 1:
                 options.append((option_name, option_value[0]))
             else:

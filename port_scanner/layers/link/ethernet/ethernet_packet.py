@@ -1,6 +1,6 @@
 import struct
 
-from port_scanner.layers.link.ethernet.ether_type import EtherType
+from port_scanner.layers.link.proto_type import EtherType
 from port_scanner.layers.link.ethernet.ethernet_utils import EthernetUtils
 from port_scanner.layers.packet import Packet
 

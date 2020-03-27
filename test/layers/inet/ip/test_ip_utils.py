@@ -1,6 +1,7 @@
+import socket
 from unittest import TestCase
 
-from port_scanner.layers.ip.ip_utils import IpUtils
+from port_scanner.layers.inet.ip.ip_utils import IpUtils
 
 
 class TestIpUtils(TestCase):
@@ -44,6 +45,16 @@ class TestIpUtils(TestCase):
         for dump, checksum in self.HEADER_DUMPS_TO_CHECKSUM.items():
             header_bytes = bytearray.fromhex(dump)
             self.assertEqual(IpUtils.calc_ip_checksum(header_bytes), checksum)
+
+    def test_validate_and_pack_ip4_addr(self):
+        valid_ip = "224.103.1.23"
+        valid_ip_bytes = socket.inet_aton(valid_ip)
+        self.assertEqual(valid_ip_bytes, IpUtils.validate_and_pack_ip4_addr(valid_ip))
+        self.assertEqual(valid_ip_bytes, IpUtils.validate_and_pack_ip4_addr(valid_ip_bytes))
+
+        invalid_ips = ["qwe", "192.168aa", "192.168.", "421.12.0.1"]
+        for ip in invalid_ips:
+            self.assertRaises(ValueError, IpUtils.validate_and_pack_ip4_addr, ip)
 
 
 

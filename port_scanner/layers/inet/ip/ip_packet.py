@@ -1,10 +1,10 @@
 import struct
 import socket
 
-from port_scanner.layers.ip.ip_diff_service_values import IpDiffServiceValues
-from port_scanner.layers.ip.ip_ecn_values import IpEcnValues
-from port_scanner.layers.ip.ip_fragmentation_flags import IpFragmentationFlags
-from port_scanner.layers.ip.ip_utils import IpUtils
+from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
+from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
+from port_scanner.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
+from port_scanner.layers.inet.ip.ip_utils import IpUtils
 from port_scanner.layers.packet import Packet
 
 

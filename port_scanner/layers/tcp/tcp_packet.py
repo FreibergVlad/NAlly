@@ -1,6 +1,6 @@
 import struct
 
-from port_scanner.layers.ip.ip_packet import IpPacket
+from port_scanner.layers.inet.ip.ip_packet import IpPacket
 from port_scanner.layers.packet import Packet
 from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
 from port_scanner.layers.tcp.tcp_utils import TcpUtils

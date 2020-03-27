@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from port_scanner.layers.link.ethernet.ether_type import EtherType
+from port_scanner.layers.link.proto_type import EtherType
 from port_scanner.layers.link.ethernet.ethernet_packet import EthernetPacket
 
 HEX_PAYLOAD = "4500006958c240000111a6120a0a9027e0670017b1fcb1fc00556bca54524942" \

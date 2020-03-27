@@ -1,5 +1,6 @@
 import random
 import socket
+from ipaddress import IPv4Address, AddressValueError
 
 from port_scanner.utils.utils import Utils
 
@@ -98,3 +99,18 @@ class IpUtils:
         if header_bytes[10] != 0 or header_bytes[11] != 0:
             raise ValueError("10-th and 11-th bytes of header should be set to 0")
         return Utils.calc_checksum(header_bytes)
+
+    @staticmethod
+    def validate_and_pack_ip4_addr(raw_ip_addr) -> bytearray:
+        """
+        Validates IPv4 address and packs it into the byte array
+        :param raw_ip_addr: string, int or bytes
+        :return: byte array representation of IPv4 address
+        :raises: ValueError: if passed value is not valid IPv4 address
+        """
+        ip_addr = None
+        try:
+            ip_addr = IPv4Address(raw_ip_addr)
+        except AddressValueError:
+            raise ValueError(f"Invalid IPv4 address: {ip_addr}")
+        return ip_addr.packed
