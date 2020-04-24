@@ -5,6 +5,9 @@ from port_scanner.utils.platform_specific.abstract_platform_specific_utils impor
 
 
 class LinuxUtils(AbstractPlatformSpecificUtils):
+    """
+    Linux implementation of OS specific utils
+    """
 
     # linux/if.h
     IFF_PROMISC = 0x100
@@ -25,6 +28,14 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
     # noinspection PyTypeChecker
     @staticmethod
     def toggle_promiscuous_mode(if_name: str, socket_obj: socket, enable: bool):
+        """
+        Toggles promiscuous mode on network card using Fcntl system calls. Available
+        only for Linux
+
+        :param if_name: network interface name
+        :param socket_obj: socket object
+        :param enable: if True, promiscuous mode will be enabled, disabled otherwise
+        """
         import fcntl
         request = LinuxUtils.FcntlRequest()
         request.if_name = if_name.encode()
