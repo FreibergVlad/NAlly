@@ -12,3 +12,4 @@ class EtherType(IntEnum):
     IPV4 = 0x0800
     IPV6 = 0x86dd
     ARP = 0x0806
+    LLDP = 0x88cc

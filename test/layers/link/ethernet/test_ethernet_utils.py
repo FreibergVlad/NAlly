@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from port_scanner.layers.link.ethernet.ethernet_utils import EthernetUtils
+from port_scanner.layers.link.proto_type import EtherType
 
 
 class TestEthernetUtils(TestCase):
@@ -21,3 +22,10 @@ class TestEthernetUtils(TestCase):
         invalid_payload = bytearray(15001)
         # should throw error if payload size is greater than max allowed one
         self.assertRaises(ValueError, EthernetUtils.validate_payload, invalid_payload)
+
+    def test_validate_ether_type(self):
+        self.assertRaises(ValueError, EthernetUtils.validate_ether_type, "a")
+        self.assertRaises(ValueError, EthernetUtils.validate_ether_type, 1510)
+        self.assertEqual(100, EthernetUtils.validate_ether_type(100))
+        self.assertEqual(EtherType.IPV4, EthernetUtils.validate_ether_type(EtherType.IPV4))
+        self.assertEqual(EtherType.IPV4, EthernetUtils.validate_ether_type(0x0800))

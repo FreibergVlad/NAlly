@@ -1,3 +1,6 @@
+from port_scanner.layers.link.proto_type import EtherType
+
+
 class EthernetUtils:
 
     MAC_LENGTH_BYTES = 6
@@ -28,3 +31,20 @@ class EthernetUtils:
             raise ValueError(f"Ethernet frame payload can't be greater than "
                              f"{EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES} bytes")
         return payload_bytes
+
+    @staticmethod
+    def validate_ether_type(ether_type):
+        """
+        Validates and return EtherType Ethernet header field
+        """
+        if isinstance(ether_type, EtherType):
+            return ether_type
+        elif isinstance(ether_type, int):
+            if ether_type <= 1500:
+                return ether_type
+            elif ether_type >= 1536:
+                return EtherType(ether_type)
+            else:
+                raise ValueError(f"Invalid EtherType field value {ether_type}")
+        else:
+            raise ValueError(f"Invalid EtherType field value {ether_type}")

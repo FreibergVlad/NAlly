@@ -22,20 +22,21 @@ class EthernetPacket(Packet):
             self,
             dest_mac,
             source_mac,
-            ether_type: EtherType = EtherType.IPV4,
+            ether_type=EtherType.IPV4,
             payload: bytearray = bytearray(0)
     ):
         """
         Initializes Ethernet frame instance
         :param dest_mac: destination MAC address, could be either a byte array or hexadecimal string
         :param source_mac: source MAC address, could be either a byte array or hexadecimal string
-        :param ether_type: indicates which protocol is encapsulated in the payload of the frame
+        :param ether_type: can either be a 2 bytes number which specifies payload size in bytes or EtherType instance
+            which indicates which protocol is encapsulated in the payload of the frame
         :param payload: byte array frame payload with length <= 1500 bytes
         """
         super().__init__()
         self.__dest_mac = EthernetUtils.validate_mac(dest_mac)
         self.__source_mac = EthernetUtils.validate_mac(source_mac)
-        self.__ether_type = ether_type
+        self.__ether_type = EthernetUtils.validate_ether_type(ether_type)
         self._payload = EthernetUtils.validate_payload(payload)
 
     def to_bytes(self):
@@ -54,7 +55,7 @@ class EthernetPacket(Packet):
         packet_fields = struct.unpack(EthernetPacket.ETHERNET_PACKET_FORMAT, header_bytes)
         dest_mac = packet_fields[0]
         source_mac = packet_fields[1]
-        ether_type = EtherType(packet_fields[2])
+        ether_type = packet_fields[2]
         return EthernetPacket(dest_mac, source_mac, ether_type, bytearray(payload_bytes))
 
     @Packet.payload.setter
@@ -85,5 +86,6 @@ class EthernetPacket(Packet):
         dest_mac = self.dest_mac.hex()
         src_mac = self.source_mac.hex()
         ether_type = hex(self.ether_type)
+        ether_type_name = self.ether_type.name if isinstance(self.ether_type, EtherType) else "length"
         return f"Ethernet(dest_mac={dest_mac}, src_mac={src_mac}, " \
-               f"ether_type={ether_type} ({self.ether_type.name})) "
+               f"ether_type={ether_type} ({ether_type_name})) "
