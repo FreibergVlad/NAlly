@@ -173,3 +173,19 @@ class TcpOptions:
         if isinstance(other, TcpOptions):
             return self.__options == other.options
         return False
+
+    def __str__(self) -> str:
+        res = ""
+        options_len = len(self.__options)
+        for i in range(options_len):
+            opt_name = self.__options[i][0]
+            opt_value = self.__options[i][1]
+            if opt_value is None:
+                res += opt_name
+            else:
+                res += f"{opt_name}={opt_value}"
+            if options_len - 1 != i:
+                res += ", "
+        return res
+
+

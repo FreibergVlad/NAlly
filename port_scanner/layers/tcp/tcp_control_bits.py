@@ -95,4 +95,16 @@ class TcpControlBits(BitFlags):
         if isinstance(other, TcpControlBits):
             return self.flags == other.flags
 
-
+    def __str__(self) -> str:
+        flags_str = ""
+        is_flag_set: callable = Utils.is_bit_set
+        if is_flag_set(self.flags, TcpControlBits.NS): flags_str += "ns "
+        if is_flag_set(self.flags, TcpControlBits.CWR): flags_str += "cwr "
+        if is_flag_set(self.flags, TcpControlBits.ECE): flags_str += "ece "
+        if is_flag_set(self.flags, TcpControlBits.URG): flags_str += "urg "
+        if is_flag_set(self.flags, TcpControlBits.ACK): flags_str += "ack "
+        if is_flag_set(self.flags, TcpControlBits.PSH): flags_str += "psh "
+        if is_flag_set(self.flags, TcpControlBits.RST): flags_str += "rst "
+        if is_flag_set(self.flags, TcpControlBits.SYN): flags_str += "syn "
+        if is_flag_set(self.flags, TcpControlBits.FIN): flags_str += "fin"
+        return flags_str.strip()

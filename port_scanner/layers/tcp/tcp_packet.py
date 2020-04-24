@@ -173,3 +173,11 @@ class TcpPacket(Packet):
                    self.urg_pointer == other.urg_pointer and \
                    self.options == other.options and \
                    self.underlying_packet == other.underlying_packet
+
+    def __str__(self) -> str:
+        return f"TCP(dest_port={self.dest_port}, src_port={self.source_port}, " \
+               f"seq_num={self.sequence_number}, ack_num={self.ack_number}, " \
+               f"flags=({self.flags}), win_size={self.win_size}, urg_pointer={self.urg_pointer}, " \
+               f"options=({self.options}))"
+
+
