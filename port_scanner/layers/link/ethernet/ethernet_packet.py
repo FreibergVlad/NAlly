@@ -81,4 +81,9 @@ class EthernetPacket(Packet):
                    self.payload == other.payload
         return False
 
-
+    def __str__(self) -> str:
+        dest_mac = self.dest_mac.hex()
+        src_mac = self.source_mac.hex()
+        ether_type = hex(self.ether_type)
+        return f"Ethernet(dest_mac={dest_mac}, src_mac={src_mac}, " \
+               f"ether_type={ether_type} ({self.ether_type.name})) "

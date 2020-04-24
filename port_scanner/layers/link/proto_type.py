@@ -10,4 +10,5 @@ class EtherType(IntEnum):
 
     # ====== New supported protocols should be added below ======
     IPV4 = 0x0800
+    IPV6 = 0x86dd
     ARP = 0x0806

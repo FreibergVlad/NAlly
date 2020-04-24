@@ -5,7 +5,7 @@ class EthernetUtils:
     MIN_PAYLOAD_LENGTH_BYTES = 46
 
     @staticmethod
-    def validate_mac(mac):
+    def validate_mac(mac) -> bytes:
         if isinstance(mac, bytes) or isinstance(mac, bytearray):
             return EthernetUtils.validate_mac_length(mac)
         if isinstance(mac, str):
@@ -13,13 +13,13 @@ class EthernetUtils:
         raise ValueError("MAC should be either a string value or byte array")
 
     @staticmethod
-    def validate_mac_length(mac: bytes):
+    def validate_mac_length(mac: bytes) -> bytes:
         if len(mac) != EthernetUtils.MAC_LENGTH_BYTES:
             raise ValueError(f"MAC address should be {EthernetUtils.MAC_LENGTH_BYTES} bytes length")
         return mac
 
     @staticmethod
-    def hex_mac_to_bytes(hex_mac: str):
+    def hex_mac_to_bytes(hex_mac: str) -> bytes:
         return EthernetUtils.validate_mac_length(bytes.fromhex(hex_mac))
 
     @staticmethod
@@ -28,5 +28,3 @@ class EthernetUtils:
             raise ValueError(f"Ethernet frame payload can't be greater than "
                              f"{EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES} bytes")
         return payload_bytes
-
-
