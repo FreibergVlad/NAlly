@@ -1,5 +1,7 @@
-import struct
+import logging
 import socket
+import struct
+import port_scanner.layers.tcp.tcp_packet as tcp_packet
 
 from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
@@ -14,11 +16,17 @@ class IpPacket(Packet):
 
     IP_V4_DEFAULT_TTL = 64
 
+    TRANSPORT_LAYER_CONVERTERS = {
+        socket.IPPROTO_TCP: tcp_packet.TcpPacket.from_bytes
+    }
+    "Defines converters to the Transport layer packets based on the value of Protocol field in IP packet"
+
+    LOG = logging.getLogger("IpPacket")
+
     def __init__(
             self,
             source_addr_str: str,
             dest_addr_str: str,
-            payload: bytes = bytearray(),
             dscp: IpDiffServiceValues = IpDiffServiceValues.DEFAULT,
             ecn: IpEcnValues = IpEcnValues.NON_ECT,
             identification: int = None,
@@ -30,11 +38,8 @@ class IpPacket(Packet):
         super().__init__()
         self.__source_addr = socket.inet_aton(source_addr_str)
         self.__dest_addr = socket.inet_aton(dest_addr_str)
-        self._payload = payload
         self.__dscp = dscp
         self.__ecn = ecn
-        self.__total_length = IpUtils.validate_packet_length(
-            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(self._payload))
         self.__identification = IpUtils.validate_or_gen_packet_id(identification)
         self.__flags = flags
         self.__fragment_offset = IpUtils.validate_fragment_offset(fragment_offset)
@@ -51,7 +56,7 @@ class IpPacket(Packet):
         header_fields = [
             IpUtils.IP_V4_VER_IHL,
             dscp_ecn,
-            self.__total_length,
+            self.total_length,
             self.__identification,
             flags_fragment_offset,
             self.__ttl,
@@ -75,7 +80,7 @@ class IpPacket(Packet):
         header_bytes[10] = checksum_bytes[0]
         header_bytes[11] = checksum_bytes[1]
 
-        return bytes(header_bytes) + self.payload
+        return bytes(header_bytes) + self.raw_payload
 
     @staticmethod
     def from_bytes(packet_bytes: bytes):
@@ -99,10 +104,9 @@ class IpPacket(Packet):
         flags = IpFragmentationFlags.from_int(flags_fragment_offset >> 13)  # take first 3 bits dropping last 13 bits
         fragment_offset = flags_fragment_offset & 0x1fff  # take last 13 bits
 
-        return IpPacket(
+        ip_packet = IpPacket(
             source_addr_str=source_addr,
             dest_addr_str=dest_addr,
-            payload=payload_bytes,
             dscp=dscp,
             ecn=ecn,
             identification=identification,
@@ -111,6 +115,19 @@ class IpPacket(Packet):
             ttl=ttl,
             protocol=protocol
         )
+
+        if len(payload_bytes) == 0:
+            return ip_packet
+        transport_layer_converter = IpPacket.TRANSPORT_LAYER_CONVERTERS.get(protocol)
+        if transport_layer_converter is None:
+            IpPacket.LOG.warning(
+                f"Can't find converter to transport layer packet. "
+                f"EtherType: {protocol}. "
+                f"Payload: {payload_bytes.hex()}"
+            )
+            return ip_packet / payload_bytes
+        transport_layer = transport_layer_converter(payload_bytes)
+        return ip_packet / transport_layer
 
     @property
     def source_addr(self) -> str:
@@ -138,7 +155,8 @@ class IpPacket(Packet):
 
     @property
     def total_length(self) -> int:
-        return self.__total_length
+        return IpUtils.validate_packet_length(
+            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(self.raw_payload))
 
     @property
     def id(self) -> int:
@@ -160,18 +178,11 @@ class IpPacket(Packet):
     def protocol(self) -> int:
         return self.__protocol
 
-    @Packet.payload.setter
-    def payload(self, payload: bytearray):
-        # since payload was changed, need to recalculate the Total Length header field
-        self.__total_length = IpUtils.validate_packet_length(
-            IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES + len(payload))
-        self._payload = payload
-
     def __eq__(self, other: object) -> bool:
         if isinstance(other, IpPacket):
             return self.source_addr == other.source_addr and \
                    self.dest_addr == other.dest_addr and \
-                   self.payload == other.payload and \
+                   self.upper_layer == other.upper_layer and \
                    self.dscp == other.dscp and \
                    self.ecn == other.ecn and \
                    self.total_length == other.total_length and \

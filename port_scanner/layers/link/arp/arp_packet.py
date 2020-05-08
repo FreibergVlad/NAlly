@@ -110,12 +110,12 @@ class ArpPacket(Packet):
     def target_proto_addr(self) -> bytes:
         return self.__target_proto_address
 
-    @Packet.payload.setter
-    def payload(self, payload: bytearray):
-        raise NotImplementedError("ARP packet doesn't support payload")
+    @property
+    def upper_layer(self):
+        return None
 
-    @Packet.payload.getter
-    def payload(self):
+    @Packet.upper_layer.setter
+    def upper_layer(self, packet):
         raise NotImplementedError("ARP packet doesn't support payload")
 
     def __eq__(self, other: object) -> bool:

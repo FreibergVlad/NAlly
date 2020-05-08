@@ -85,7 +85,7 @@ class TestTcpPacket(TestCase):
             ]),
             payload=bytearray(0)
         )
-        tcp_packet1.underlying_packet = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="35.160.240.60")
+        tcp_packet1 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="35.160.240.60") / tcp_packet1
         self.__test_tcp_packet(PACKET_DUMP_1, tcp_packet1)
 
         tcp_packet2 = TcpPacket(
@@ -96,7 +96,7 @@ class TestTcpPacket(TestCase):
             flags=TcpControlBits(ack=True),
             win_size=496
         )
-        tcp_packet2.underlying_packet = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="40.101.18.242")
+        tcp_packet2 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="40.101.18.242") / tcp_packet2
         self.__test_tcp_packet(PACKET_DUMP_2, tcp_packet2)
 
         tcp_packet3 = TcpPacket(
@@ -113,31 +113,16 @@ class TestTcpPacket(TestCase):
             ]),
             payload=bytearray.fromhex(PACKET_DUMP_3_PAYLOAD)
         )
-        tcp_packet3.underlying_packet = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="10.10.144.153")
+        tcp_packet3 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="10.10.144.153") / tcp_packet3
         self.__test_tcp_packet(PACKET_DUMP_3, tcp_packet3)
 
-    def test_copy(self):
-        tcp_packet = TcpPacket(
-            source_port=59700,
-            dest_port=443,
-            sequence_number=1407506493,
-            ack_number=3676709599,
-            flags=TcpControlBits(ack=True),
-            win_size=501,
-            urg_pointer=0,
-            options=TcpOptions([
-                TcpOptions.NOP,
-                TcpOptions.NOP,
-                (TcpOptions.TIMESTAMPS, [3252488245, 365238493])
-            ]),
-            payload=bytearray(0)
-        )
-        self.assertEqual(tcp_packet, tcp_packet.clone())
-
-    def __test_tcp_packet(self, expected_hex_dump: str, packet: TcpPacket):
-        packet_bytes = packet.to_bytes()
+    def __test_tcp_packet(self, expected_hex_dump: str, packet: IpPacket):
+        self.assertTrue(isinstance(packet, IpPacket))
+        tcp_packet = packet.upper_layer
+        self.assertTrue(isinstance(tcp_packet, TcpPacket))
+        packet_bytes = tcp_packet.to_bytes()
         self.assertEqual(expected_hex_dump, packet_bytes.hex())
         parsed_packet = TcpPacket.from_bytes(packet_bytes)
-        parsed_packet.underlying_packet = packet.underlying_packet
-        self.assertEqual(packet, parsed_packet)
+        parsed_packet.under_layer = packet
+        self.assertEqual(tcp_packet, parsed_packet)
         self.assertEqual(expected_hex_dump, parsed_packet.to_bytes().hex())

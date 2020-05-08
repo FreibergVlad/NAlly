@@ -1,6 +1,6 @@
 import struct
+import port_scanner.layers.inet.ip.ip_packet as ip
 
-from port_scanner.layers.inet.ip.ip_packet import IpPacket
 from port_scanner.layers.packet import Packet
 from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
 from port_scanner.layers.tcp.tcp_utils import TcpUtils
@@ -33,7 +33,7 @@ class TcpPacket(Packet):
         self.__win_size = win_size
         self.__urg_pointer = urg_pointer
         self.__options = options
-        self._payload = payload
+        self.__payload = payload
 
     def to_bytes(self):
         options_bytes = self.__options.to_bytes()
@@ -62,9 +62,9 @@ class TcpPacket(Packet):
         struct.pack_into(self.TCP_HEADER_FORMAT, header_buffer, 0, *header_fields)
 
         # generate pseudo header using underlying IP packet
-        pseudo_header = self.__get_pseudo_header(data_offset * 4 + len(self._payload))
+        pseudo_header = self.__get_pseudo_header(data_offset * 4 + len(self.__payload))
         # calculate checksum
-        checksum = TcpUtils.calc_tcp_checksum(pseudo_header, header_buffer, options_bytes + self._payload)
+        checksum = TcpUtils.calc_tcp_checksum(pseudo_header, header_buffer, options_bytes + self.__payload)
         # split 16-bits checksum into two 8-bits values
         checksum_bytes = checksum.to_bytes(2, byteorder="big")
         # checksum takes 16-th and 17-th bytes of the header (counting from 0)
@@ -72,12 +72,12 @@ class TcpPacket(Packet):
         header_buffer[16] = checksum_bytes[0]
         header_buffer[17] = checksum_bytes[1]
 
-        return TcpUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self._payload)
+        return TcpUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self.__payload)
 
     def __get_pseudo_header(self, segment_len) -> bytes:
-        if not isinstance(self.underlying_packet, IpPacket):
+        if not isinstance(self.under_layer, ip.IpPacket):
             raise ValueError("Underlying packet should be IpPacket instance")
-        ip_packet: IpPacket = self.underlying_packet
+        ip_packet: ip.IpPacket = self.under_layer
         return struct.pack(
             self.TCP_PSEUDO_HEADER_FORMAT,
             ip_packet.source_addr_raw,
@@ -161,23 +161,25 @@ class TcpPacket(Packet):
     def options(self) -> TcpOptions:
         return self.__options
 
+    @property
+    def payload(self) -> bytearray:
+        return self.__payload
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TcpPacket):
             return self.dest_port == other.dest_port and \
                    self.source_port == other.source_port and \
-                   self.payload == other.payload and \
+                   self.upper_layer == other.upper_layer and \
                    self.sequence_number == other.sequence_number and \
                    self.ack_number == other.ack_number and \
                    self.flags == other.flags and \
                    self.win_size == other.win_size and \
                    self.urg_pointer == other.urg_pointer and \
                    self.options == other.options and \
-                   self.underlying_packet == other.underlying_packet
+                   self.payload == other.payload
 
     def __str__(self) -> str:
         return f"TCP(dest_port={self.dest_port}, src_port={self.source_port}, " \
                f"seq_num={self.sequence_number}, ack_num={self.ack_number}, " \
                f"flags=({self.flags}), win_size={self.win_size}, urg_pointer={self.urg_pointer}, " \
                f"options=({self.options}))"
-
-

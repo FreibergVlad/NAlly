@@ -14,7 +14,7 @@ class Sniffer:
     """
 
     ETH_P_ALL = 3  # TODO move to commons utils?
-    # FIXME should buffer size be equal to maximum Ethernet frame size?
+    # FIXME should socket buffer size be equal to maximum Ethernet frame size?
     BUFFER_SIZE_BYTES = EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES
 
     def __init__(
