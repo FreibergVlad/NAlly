@@ -8,9 +8,32 @@ from port_scanner.layers.tcp.tcp_options import TcpOptions
 
 
 class TcpPacket(Packet):
+    """
+    Represents TCP (Transmission Control Protocol) packet
+    """
 
     TCP_HEADER_FORMAT = "!HHIIHHHH"
+    """
+    Defines TCP header format without options:
+        * Source port field : 2 bytes
+        * Destination port field : 2 bytes
+        * Sequence number field : 4 bytes
+        * Acknowledgment number field : 4 bytes
+        * Data offset field + 3 reserved bits + 9 bit flags : 2 bytes
+        * Window size field : 2 bytes
+        * Checksum field : 2 bytes
+        * Urgent pointer field : 2 bytes
+    """
+
     TCP_PSEUDO_HEADER_FORMAT = "!4s4sBBH"
+    """
+    Defines pseudo header format used for checksum computation (IPv4):
+        * Source address : 4 bytes
+        * Destination address : 4 bytes
+        * Zero padding : 1 byte
+        * Protocol : 1 byte
+        * TCP packet length : 2 bytes
+    """
 
     def __init__(
             self,
@@ -24,6 +47,29 @@ class TcpPacket(Packet):
             options: TcpOptions = TcpOptions(),
             payload: bytearray = bytearray()
     ):
+        """
+        Initializes TCP packet instance
+
+        :param source_port: Source port field value, integer in range [0; 65535]
+        :param dest_port: Destination port field value, integer in range [0; 65535]
+        :param sequence_number: Sequence number field value. Has a dual role:
+            If the SYN flag is set (1), then this is the initial sequence number.
+                The sequence number of the actual first data byte and the acknowledged number
+                in the corresponding ACK are then this sequence number plus 1.
+            If the SYN flag is clear (0), then this is the accumulated sequence number of the
+                first data byte of this segment for the current session.
+        :param ack_number: Acknowledgment number field value. If the ACK flag is set then the
+            value of this field is the next sequence number that the sender of the ACK is expecting.
+            This acknowledges receipt of all prior bytes (if any). The first ACK sent by each end
+            acknowledges the other end's initial sequence number itself, but no data.
+        :param flags: Flags field. Instance of TcpControlBits class. Contains 9 1-bit flags (control bits)
+        :param win_size: Window size field value. The size of the receive window, which specifies
+            the number of window size units that the sender of this segment is currently willing to receive.
+        :param urg_pointer: Urgent pointer field value. If the URG flag is set, then this 16-bit field
+            is an offset from the sequence number indicating the last urgent data byte.
+        :param options: Options field. Instance of TcpOptions class.
+        :param payload: packet payload
+        """
         super().__init__()
         self.__source_port = TcpUtils.validate_port_num(source_port)
         self.__dest_port = TcpUtils.validate_port_num(dest_port)

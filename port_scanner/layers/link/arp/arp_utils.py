@@ -22,24 +22,40 @@ class ArpOperation(IntEnum):
 
 
 class ArpUtils:
+    """
+    Defines useful utility methods related to ARP protocol
+    """
+
     HARDWARE_LENGTH = {
         ArpHardwareType.ETHERNET: 6
     }
+    """
+    Defines possible values of HLEN field in accordance with HTYPE field values
+    """
 
     PROTOCOL_LENGTH = {
         EtherType.IPV4: 4
     }
+    """
+    Defines possible values of PLEN field in accordance with PTYPE field values
+    """
 
     HW_ADDR_VALIDATORS = {
         ArpHardwareType.ETHERNET: EthernetUtils.validate_mac
     }
+    """
+    Defines validators for SHA, THA fields in accordance with HTYPE field values
+    """
 
     PROTO_ADDR_VALIDATORS = {
         EtherType.IPV4: IpUtils.validate_and_pack_ip4_addr
     }
+    """
+    Defines validators for SPA, TPA fields in accordance with PTYPE field values
+    """
 
     @staticmethod
-    def validate_hw_addr(hw_addr, hw_type: ArpHardwareType) -> bytearray:
+    def validate_hw_addr(hw_addr, hw_type: ArpHardwareType) -> bytes:
         """
         Validates hardware address in accordance with hardware type
         """
@@ -49,7 +65,7 @@ class ArpUtils:
         return addr_validator(hw_addr)
 
     @staticmethod
-    def validate_proto_addr(proto_addr, proto_type: EtherType) -> bytearray:
+    def validate_proto_addr(proto_addr, proto_type: EtherType) -> bytes:
         """
         Validates protocol address in accordance with protocol type
         """

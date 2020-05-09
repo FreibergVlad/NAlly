@@ -38,5 +38,3 @@ class IpFragmentationFlags(BitFlags):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, IpFragmentationFlags):
             return self.flags == other.flags
-
-

@@ -9,4 +9,3 @@ class SynScanningStrategy(ScanningStrategy):
     @staticmethod
     def get_strategy_name() -> str:
         return ScanningStrategy.SYN_STRATEGY
-

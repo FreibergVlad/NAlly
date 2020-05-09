@@ -104,6 +104,7 @@ class IpUtils:
     def validate_and_pack_ip4_addr(raw_ip_addr) -> bytearray:
         """
         Validates IPv4 address and packs it into the byte array
+
         :param raw_ip_addr: string, int or bytes
         :return: byte array representation of IPv4 address
         :raises: ValueError: if passed value is not valid IPv4 address

@@ -7,19 +7,42 @@ from port_scanner.layers.packet import Packet
 
 
 class ArpPacket(Packet):
+    """
+    Represents ARP (Address Resolution Protocol) packet
+    """
 
     ARP_PACKET_FORMAT = "!HHBBH"
+    """
+    Defines format of ARP packet without hardware and protocol addresses
+    (their sizes calculated dynamically based on HLEN, PLEN fields values):
+        * HTYPE field : 2 bytes
+        * PTYPE field : 2 bytes
+        * HLEN field : 1 byte
+        * PLEN field : 1 byte
+        * Operation field : 1 byte
+    """
 
     def __init__(
             self,
-            hardware_type: ArpHardwareType,
-            protocol_type: EtherType,
             operation: ArpOperation,
             sender_hw_address,
             sender_proto_address,
             target_hw_address,
-            target_proto_address
+            target_proto_address,
+            hardware_type: ArpHardwareType = ArpHardwareType.ETHERNET,
+            protocol_type: EtherType = EtherType.IPV4,
     ):
+        """
+        Initializes ARP packet instance
+
+        :param operation: Operation field, instance of ArpOperation enum
+        :param sender_hw_address: sender hardware address, format depends on HTYPE field
+        :param sender_proto_address: sender protocol address, format depends on PTYPE field
+        :param target_hw_address: target hardware address, format depends on HTYPE field
+        :param target_proto_address: target protocol address, format depends on PTYPE field
+        :param hardware_type: HTYPE field, instance of ArpHardwareType enum, Ethernet by default
+        :param protocol_type: PTYPE field, instance of EtherType enum, IPv4 by default
+        """
         super().__init__()
         self.__hardware_type = hardware_type
         self.__protocol_type = protocol_type
@@ -109,10 +132,6 @@ class ArpPacket(Packet):
     @property
     def target_proto_addr(self) -> bytes:
         return self.__target_proto_address
-
-    @property
-    def upper_layer(self):
-        return None
 
     @Packet.upper_layer.setter
     def upper_layer(self, packet):

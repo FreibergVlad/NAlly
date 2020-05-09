@@ -17,7 +17,7 @@ class EthernetPacket(Packet):
 
     ETHERNET_PACKET_FORMAT = "!6s6sH"
     """
-    Ethernet packet format, includes 12 bytes for source and 
+    Ethernet packet format, includes 12 bytes for source and
     destination MAC addresses and also 2 bytes for EtherType/length field
     """
 
@@ -39,6 +39,7 @@ class EthernetPacket(Packet):
     ):
         """
         Initializes Ethernet frame instance
+
         :param dest_mac: destination MAC address, could be either a byte array or hexadecimal string
         :param source_mac: source MAC address, could be either a byte array or hexadecimal string
         :param ether_type: can either be a 2 bytes number which specifies payload size in bytes or EtherType instance

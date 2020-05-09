@@ -187,5 +187,3 @@ class TcpOptions:
             if options_len - 1 != i:
                 res += ", "
         return res
-
-

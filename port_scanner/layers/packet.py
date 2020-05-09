@@ -13,15 +13,24 @@ class Packet(ABC):
 
     @abstractmethod
     def to_bytes(self):
+        """
+        Converts 'Packet' instance to the 'bytes' representation ready to be sent over the network
+        """
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def from_bytes(bytes_packet: bytes):
+        """
+        Converts raw bytes to the Packet instance, also tries to parse upper protocols layers
+        """
         raise NotImplementedError
 
     @property
     def raw_payload(self) -> bytes:
+        """
+        Returns 'bytes' representation of all upper protocols layers if present
+        """
         return self.upper_layer.to_bytes() if self.upper_layer is not None else bytes()
 
     @property
@@ -57,6 +66,13 @@ class Packet(ABC):
             self.upper_layer.add_payload(payload)
 
     def __truediv__(self, other):
+        """
+        Performs layer stacking. Puts right packet to the payload of the left one.
+        If right packet already has the upper layer packet, then checks all upper layers
+        until packet without payload will be found
+
+        :param other: either a Packet instance or raw bytes
+        """
         if isinstance(other, (bytes, bytearray)):
             from port_scanner.layers.raw_packet import RawPacket
             other = RawPacket(other)

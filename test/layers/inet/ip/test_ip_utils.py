@@ -55,7 +55,3 @@ class TestIpUtils(TestCase):
         invalid_ips = ["qwe", "192.168aa", "192.168.", "421.12.0.1"]
         for ip in invalid_ips:
             self.assertRaises(ValueError, IpUtils.validate_and_pack_ip4_addr, ip)
-
-
-
-

@@ -2,6 +2,9 @@ from port_scanner.layers.packet import Packet
 
 
 class RawPacket(Packet):
+    """
+    Raw implementation of Packet interface. Actually, just a holder of raw bytes
+    """
 
     def __init__(self, raw_packet):
         super().__init__()
@@ -17,10 +20,6 @@ class RawPacket(Packet):
     @property
     def raw_packet(self):
         return self.__raw_packet
-
-    @property
-    def upper_layer(self):
-        return None
 
     @Packet.upper_layer.setter
     def upper_layer(self, upper_layer):

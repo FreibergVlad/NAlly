@@ -11,15 +11,36 @@ from port_scanner.layers.packet import Packet
 
 
 class IpPacket(Packet):
+    """
+    Represents IPv4 packet
+
+    Note: implementation doesn't support 'Options' field
+    """
 
     IP_V4_HEADER_FORMAT = "!BBHHHBBH4s4s"
+    """
+    Defines format of IPv4 header fields:
+        * Version + IHL : 1 byte
+        * DSCP + ECN : 1 byte
+        * Total Length : 2 bytes
+        * Identification : 2 bytes
+        * Flags + Fragment Offset : 2 bytes
+        * TTL : 1 byte
+        * Protocol : 1 byte
+        * Header checksum : 2 bytes
+        * Source IP : 4 bytes
+        * Destination IP : 4 bytes
+    """
 
     IP_V4_DEFAULT_TTL = 64
 
     TRANSPORT_LAYER_CONVERTERS = {
         socket.IPPROTO_TCP: tcp_packet.TcpPacket.from_bytes
     }
-    "Defines converters to the Transport layer packets based on the value of Protocol field in IP packet"
+    """
+    Defines converters to the Transport layer packets based on the value
+    of Protocol field in IP packet
+    """
 
     LOG = logging.getLogger("IpPacket")
 
@@ -35,6 +56,22 @@ class IpPacket(Packet):
             ttl: int = IP_V4_DEFAULT_TTL,
             protocol: int = socket.IPPROTO_TCP
     ):
+        """
+        Initializes IPv4 packet instance
+
+        :param source_addr_str: string representation of source IP address
+        :param dest_addr_str: string representation of destination IP address
+        :param dscp: DSCP field, instance of IpDiffServiceValues enum
+        :param ecn: ECN field, instance of IpEcnValues enum
+        :param identification: unique identifier of the fragment in a single IP datagram.
+            Should be a 16 bits integer. If None, then randomly generated value will be used
+        :param flags: fragmentation flags, instance of IpFragmentationFlags, DF by default
+        :param fragment_offset: Fragment Offset field, 13 bits integer, 0 by default
+        :param ttl: TTL field, defines packet lifetime, 64 by default
+        :param protocol: Protocol field, defines the protocol used in the data
+            portion of the IP datagram. Full list of protocols available
+            at https://tools.ietf.org/html/rfc790
+        """
         super().__init__()
         self.__source_addr = socket.inet_aton(source_addr_str)
         self.__dest_addr = socket.inet_aton(dest_addr_str)
@@ -101,8 +138,10 @@ class IpPacket(Packet):
         dscp = IpDiffServiceValues(dscp_ecn >> 2)  # take first 6 bits dropping last 2 bits
         ecn = IpEcnValues(dscp_ecn & 3)  # take last 2 bits
 
-        flags = IpFragmentationFlags.from_int(flags_fragment_offset >> 13)  # take first 3 bits dropping last 13 bits
-        fragment_offset = flags_fragment_offset & 0x1fff  # take last 13 bits
+        # take first 3 bits dropping last 13 bits
+        flags = IpFragmentationFlags.from_int(flags_fragment_offset >> 13)
+        # take last 13 bits
+        fragment_offset = flags_fragment_offset & 0x1fff
 
         ip_packet = IpPacket(
             source_addr_str=source_addr,
@@ -118,6 +157,7 @@ class IpPacket(Packet):
 
         if len(payload_bytes) == 0:
             return ip_packet
+        # try to find appropriate converter based on protocol field
         transport_layer_converter = IpPacket.TRANSPORT_LAYER_CONVERTERS.get(protocol)
         if transport_layer_converter is None:
             IpPacket.LOG.warning(
