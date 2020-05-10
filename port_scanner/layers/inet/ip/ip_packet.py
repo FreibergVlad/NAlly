@@ -232,3 +232,11 @@ class IpPacket(Packet):
                    self.ttl == other.ttl and \
                    self.protocol == other.protocol
         return False
+
+    def __str__(self) -> str:
+        return f"IP(dest_addr={self.dest_addr}, src_addr={self.source_addr}, " \
+               f"dscp={self.dscp}, ecn={self.ecn}, " \
+               f"length={self.total_length}, id={self.id}, flags=({self.flags}), " \
+               f"frag_offset={self.frag_offset}, ttl={self.ttl}, protocol={self.protocol})"
+
+

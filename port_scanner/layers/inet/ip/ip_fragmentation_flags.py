@@ -38,3 +38,13 @@ class IpFragmentationFlags(BitFlags):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, IpFragmentationFlags):
             return self.flags == other.flags
+
+    def __str__(self) -> str:
+        res = ""
+        if self.is_flag_set(self.DF):
+            res += "df "
+        if self.is_flag_set(self.MF):
+            res += "mf"
+        if len(res) == 0:
+            res = "none"
+        return res.strip()
