@@ -21,6 +21,8 @@ class Utils:
         :param: byte_buffer: input byte sequence
         :return: calculated checksum (16 bits value)
         """
+        if len(byte_buffer) % 2 != 0:
+            byte_buffer += b'\0'
         checksum = 0
         for i in range(0, len(byte_buffer), 2):
             # pair two bytes into 16-bits value

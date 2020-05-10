@@ -66,6 +66,37 @@ PACKET_DUMP_3_PAYLOAD = "a9c23efadc549e4ab164aa1c29b3e2eecd8a5e27dfa02f730670" \
                         "5520326f79df2d40bd188c8f82a878b95c173c59b653e51d7fb5"
 PACKET_DUMP_3 = "a9d8089129e71a0aadc77287801857bd9f6500000101080a4e60f965b493137a" + PACKET_DUMP_3_PAYLOAD
 
+#
+# Source port = 59058
+# Destination port = 443
+# Sequence number = 746641599
+# Acknowledgment number = 1952224292
+# Flags = 0x018 (PSH, ACK)
+# Window size = 2483
+# Checksum = 0xd5e3
+# Urgent pointer = 0
+# Options:
+#   NOP
+#   NOP
+#   Timestamps = 4044761679 and 555562620
+#
+# Underlying IP:
+#   Src = 192.168.1.32
+#   Dst = 93.186.225.198
+#
+PACKET_DUMP_4_PAYLOAD = "17030300a8ea868c92a8653042882371" \
+                        "eb660cf473bf07a4b001da1892881deb" \
+                        "60c2a7b35336e4a70cd39967182daa29" \
+                        "462a88040ea44cada49e62483856e3e0" \
+                        "ab6faed8398d1edb3dcb5cebda7f0b1d" \
+                        "caa42c2ed00f5be5deec3e8683613d46" \
+                        "56e1de332c582329e6200cf76c4f0f18" \
+                        "54a77b2debeefe824be819f4f4fadbfa" \
+                        "0726f9b020bf88b04f6dfc329f1bb182" \
+                        "f8a890df26b75043ec99cacb457f64ce" \
+                        "d649de4620b7fdb02fa3ce6e4f"
+PACKET_DUMP_4 = "e6b201bb2c80d8bf745c9424801809b3d5e300000101080af1162a4f211d367c" + PACKET_DUMP_4_PAYLOAD
+
 
 class TestTcpPacket(TestCase):
 
@@ -115,6 +146,23 @@ class TestTcpPacket(TestCase):
         )
         tcp_packet3 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="10.10.144.153") / tcp_packet3
         self.__test_tcp_packet(PACKET_DUMP_3, tcp_packet3)
+
+        tcp_packet4 = TcpPacket(
+            source_port=59058,
+            dest_port=443,
+            sequence_number=746641599,
+            ack_number=1952224292,
+            flags=TcpControlBits(ack=True, psh=True),
+            win_size=2483,
+            options=TcpOptions([
+                TcpOptions.NOP,
+                TcpOptions.NOP,
+                (TcpOptions.TIMESTAMPS, [4044761679, 555562620])
+            ]),
+            payload=bytearray.fromhex(PACKET_DUMP_4_PAYLOAD)
+        )
+        tcp_packet4 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="93.186.225.198") / tcp_packet4
+        self.__test_tcp_packet(PACKET_DUMP_4, tcp_packet4)
 
     def __test_tcp_packet(self, expected_hex_dump: str, packet: IpPacket):
         self.assertTrue(isinstance(packet, IpPacket))
