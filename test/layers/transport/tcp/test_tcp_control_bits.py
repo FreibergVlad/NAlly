@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
+from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
 
 
 class TestTcpControlBits(TestCase):

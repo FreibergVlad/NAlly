@@ -2,9 +2,9 @@ import struct
 import port_scanner.layers.inet.ip.ip_packet as ip
 
 from port_scanner.layers.packet import Packet
-from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
-from port_scanner.layers.tcp.tcp_utils import TcpUtils
-from port_scanner.layers.tcp.tcp_options import TcpOptions
+from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
+from port_scanner.layers.transport.tcp.tcp_utils import TcpUtils
+from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
 
 
 class TcpPacket(Packet):

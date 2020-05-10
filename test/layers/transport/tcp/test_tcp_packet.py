@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from port_scanner.layers.inet.ip.ip_packet import IpPacket
-from port_scanner.layers.tcp.tcp_packet import TcpPacket
-from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
-from port_scanner.layers.tcp.tcp_options import TcpOptions
+from port_scanner.layers.transport.tcp.tcp_packet import TcpPacket
+from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
+from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
 
 #
 # Source port = 59700

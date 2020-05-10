@@ -7,9 +7,9 @@ from port_scanner.layers.link.arp.arp_packet import ArpPacket
 from port_scanner.layers.link.arp.arp_utils import ArpHardwareType, ArpOperation
 from port_scanner.layers.link.ethernet.ethernet_packet import EthernetPacket
 from port_scanner.layers.link.proto_type import EtherType
-from port_scanner.layers.tcp.tcp_control_bits import TcpControlBits
-from port_scanner.layers.tcp.tcp_options import TcpOptions
-from port_scanner.layers.tcp.tcp_packet import TcpPacket
+from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
+from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
+from port_scanner.layers.transport.tcp.tcp_packet import TcpPacket
 
 ARP_PAYLOAD_TEST_CONTEXT = {
     #

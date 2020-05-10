@@ -1,7 +1,7 @@
 import logging
 import socket
 import struct
-import port_scanner.layers.tcp.tcp_packet as tcp_packet
+import port_scanner.layers.transport.tcp.tcp_packet as tcp_packet
 
 from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
@@ -162,7 +162,7 @@ class IpPacket(Packet):
         if transport_layer_converter is None:
             IpPacket.LOG.warning(
                 f"Can't find converter to transport layer packet. "
-                f"EtherType: {protocol}. "
+                f"Protocol: {protocol}. "
                 f"Payload: {payload_bytes.hex()}"
             )
             return ip_packet / payload_bytes

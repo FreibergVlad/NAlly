@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from port_scanner.layers.tcp.tcp_options import TcpOptions
+from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
 
 
 class TestTcpOptions(TestCase):

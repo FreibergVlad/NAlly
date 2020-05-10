@@ -3,7 +3,7 @@ from typing import Tuple
 
 import struct
 
-from port_scanner.layers.tcp.tcp_utils import TcpUtils
+from port_scanner.layers.transport.tcp.tcp_utils import TcpUtils
 
 
 class TcpOptions:
