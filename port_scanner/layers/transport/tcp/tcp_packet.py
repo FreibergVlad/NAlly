@@ -1,10 +1,11 @@
 import struct
-import port_scanner.layers.inet.ip.ip_packet as ip
 
 from port_scanner.layers.packet import Packet
 from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
 from port_scanner.layers.transport.tcp.tcp_utils import TcpUtils
 from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
+from port_scanner.layers.transport.transport_layer_utils import TransportLayerUtils
+from port_scanner.utils.utils import Utils
 
 
 class TcpPacket(Packet):
@@ -23,16 +24,6 @@ class TcpPacket(Packet):
         * Window size field : 2 bytes
         * Checksum field : 2 bytes
         * Urgent pointer field : 2 bytes
-    """
-
-    TCP_PSEUDO_HEADER_FORMAT = "!4s4sBBH"
-    """
-    Defines pseudo header format used for checksum computation (IPv4):
-        * Source address : 4 bytes
-        * Destination address : 4 bytes
-        * Zero padding : 1 byte
-        * Protocol : 1 byte
-        * TCP packet length : 2 bytes
     """
 
     def __init__(
@@ -71,8 +62,8 @@ class TcpPacket(Packet):
         :param payload: packet payload
         """
         super().__init__()
-        self.__source_port = TcpUtils.validate_port_num(source_port)
-        self.__dest_port = TcpUtils.validate_port_num(dest_port)
+        self.__source_port = TransportLayerUtils.validate_port_num(source_port)
+        self.__dest_port = TransportLayerUtils.validate_port_num(dest_port)
         self.__sequence_number = sequence_number
         self.__ack_number = ack_number
         self.__flags = flags
@@ -108,9 +99,12 @@ class TcpPacket(Packet):
         struct.pack_into(self.TCP_HEADER_FORMAT, header_buffer, 0, *header_fields)
 
         # generate pseudo header using underlying IP packet
-        pseudo_header = self.__get_pseudo_header(data_offset * 4 + len(self.__payload))
+        pseudo_header = TransportLayerUtils.get_pseudo_header(
+            self,
+            data_offset * 4 + len(self.__payload)
+        )
         # calculate checksum
-        checksum = TcpUtils.calc_tcp_checksum(pseudo_header, header_buffer, options_bytes + self.__payload)
+        checksum = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + self.__payload)
         # split 16-bits checksum into two 8-bits values
         checksum_bytes = checksum.to_bytes(2, byteorder="big")
         # checksum takes 16-th and 17-th bytes of the header (counting from 0)
@@ -118,20 +112,7 @@ class TcpPacket(Packet):
         header_buffer[16] = checksum_bytes[0]
         header_buffer[17] = checksum_bytes[1]
 
-        return TcpUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self.__payload)
-
-    def __get_pseudo_header(self, segment_len) -> bytes:
-        if not isinstance(self.under_layer, ip.IpPacket):
-            raise ValueError("Underlying packet should be IpPacket instance")
-        ip_packet: ip.IpPacket = self.under_layer
-        return struct.pack(
-            self.TCP_PSEUDO_HEADER_FORMAT,
-            ip_packet.source_addr_raw,
-            ip_packet.dest_addr_raw,
-            0,  # reserved 8 zero bits
-            ip_packet.protocol,
-            segment_len,
-        )
+        return TransportLayerUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self.__payload)
 
     @staticmethod
     def from_bytes(packet_bytes: bytes):

@@ -12,12 +12,16 @@ class Utils:
         return bits & bit_mask != 0
 
     @staticmethod
-    def calc_checksum(byte_buffer: bytearray) -> int:
+    def calc_checksum(byte_buffer: bytes) -> int:
         """
-        Calculates checksum, the following algorithm is applied for IPv4, TCP, UDP protocols:
+        Calculates checksum using the algorithm described in
+        https://tools.ietf.org/html/rfc793#section-3.1
+
+        The following algorithm is applied for IPv4, TCP, UDP protocols:
             - Split input byte sequence to 16 bits words
             - Compute sum of these words
             - Compute sum one's complement
+
         :param: byte_buffer: input byte sequence
         :return: calculated checksum (16 bits value)
         """
