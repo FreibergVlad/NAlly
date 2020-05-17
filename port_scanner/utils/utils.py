@@ -12,7 +12,7 @@ class Utils:
         return bits & bit_mask != 0
 
     @staticmethod
-    def calc_checksum(byte_buffer: bytes) -> int:
+    def calc_checksum(byte_buffer: bytes) -> bytes:
         """
         Calculates checksum using the algorithm described in
         https://tools.ietf.org/html/rfc793#section-3.1
@@ -34,4 +34,6 @@ class Utils:
             checksum += paired_bytes
         checksum += (checksum >> 16)
         checksum = ~checksum & 0xffff
-        return checksum
+        # split 16-bits checksum into two 8-bits values
+        checksum_bytes = checksum.to_bytes(2, byteorder="big")
+        return checksum_bytes

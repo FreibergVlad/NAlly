@@ -2,8 +2,6 @@ import random
 import socket
 from ipaddress import IPv4Address, AddressValueError
 
-from port_scanner.utils.utils import Utils
-
 
 class IpUtils:
     """
@@ -83,25 +81,7 @@ class IpUtils:
         return random.getrandbits(IpUtils.IP_V4_MAX_ID_LENGTH_BITS)
 
     @staticmethod
-    def calc_ip_checksum(header_bytes: bytearray) -> int:
-        """
-        Calculates IPv4 header checksum using the algorithm described in
-        https://tools.ietf.org/html/rfc1624
-
-        Note: header passed as method param should have 10-th and 11-th bytes
-        (counting from 0) set to 0
-
-        :param header_bytes: header fields in byte array representation
-            with 10-th and 11-th bytes (counting from 0) set to 0
-        :return: calculated checksum (16 bits number)
-        :raises: ValueError: if 10-th or 11-th byte of header is not 0
-        """
-        if header_bytes[10] != 0 or header_bytes[11] != 0:
-            raise ValueError("10-th and 11-th bytes of header should be set to 0")
-        return Utils.calc_checksum(header_bytes)
-
-    @staticmethod
-    def validate_and_pack_ip4_addr(raw_ip_addr) -> bytearray:
+    def validate_and_pack_ip4_addr(raw_ip_addr) -> bytes:
         """
         Validates IPv4 address and packs it into the byte array
 

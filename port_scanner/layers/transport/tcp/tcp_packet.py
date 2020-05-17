@@ -104,9 +104,7 @@ class TcpPacket(Packet):
             data_offset * 4 + len(self.__payload)
         )
         # calculate checksum
-        checksum = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + self.__payload)
-        # split 16-bits checksum into two 8-bits values
-        checksum_bytes = checksum.to_bytes(2, byteorder="big")
+        checksum_bytes = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + self.__payload)
         # checksum takes 16-th and 17-th bytes of the header (counting from 0)
         # see https://tools.ietf.org/html/rfc793#section-3.1 for more details
         header_buffer[16] = checksum_bytes[0]

@@ -8,6 +8,7 @@ from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
 from port_scanner.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
 from port_scanner.layers.inet.ip.ip_utils import IpUtils
 from port_scanner.layers.packet import Packet
+from port_scanner.utils.utils import Utils
 
 
 class IpPacket(Packet):
@@ -109,9 +110,7 @@ class IpPacket(Packet):
         struct.pack_into(self.IP_V4_HEADER_FORMAT, header_bytes, 0, *header_fields)
 
         # calculate checksum
-        checksum = IpUtils.calc_ip_checksum(header_bytes)
-        # split 16-bits checksum into two 8-bits values
-        checksum_bytes = checksum.to_bytes(2, byteorder="big")
+        checksum_bytes = Utils.calc_checksum(header_bytes)
         # checksum takes 10-th and 11-th bytes of the header (counting from 0)
         # see https://tools.ietf.org/html/rfc791#section-3.1 for more details
         header_bytes[10] = checksum_bytes[0]
@@ -238,5 +237,3 @@ class IpPacket(Packet):
                f"dscp={self.dscp}, ecn={self.ecn}, " \
                f"length={self.total_length}, id={self.id}, flags=({self.flags}), " \
                f"frag_offset={self.frag_offset}, ttl={self.ttl}, protocol={self.protocol})"
-
-
