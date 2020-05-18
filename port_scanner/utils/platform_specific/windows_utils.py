@@ -8,6 +8,10 @@ class WindowsUtils(AbstractPlatformSpecificUtils):
         raise NotImplementedError
 
     @staticmethod
+    def get_net_interface_mac(if_name: str) -> str:
+        raise NotImplementedError
+
+    @staticmethod
     def get_net_interface_ip(if_name: str) -> str:
         raise NotImplementedError
 

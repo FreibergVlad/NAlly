@@ -16,6 +16,14 @@ class AbstractPlatformSpecificUtils(ABC):
 
     @staticmethod
     @abstractmethod
+    def get_net_interface_mac(if_name: str) -> str:
+        """
+        Returns MAC address associated with this network interface.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
     def get_net_interface_ip(if_name: str) -> str:
         """
         Returns IP address associated with this network interface.

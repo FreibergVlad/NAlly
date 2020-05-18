@@ -29,6 +29,10 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
     """
     Gets the IP address of the device
     """
+    SIOCGIFHWADDR = 0x8927
+    """
+    Gets the MAC address of the device
+    """
 
     # linux/route.h
     RTF_GATEWAY = 0x0002
@@ -61,6 +65,23 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
                 if destination == '00000000' and int(flags, 16) & LinuxUtils.RTF_GATEWAY:
                     return fields[0]
         raise RuntimeError("Can't find default network interface in /proc/net/route")
+
+    # noinspection PyTypeChecker
+    @staticmethod
+    def get_net_interface_mac(if_name: str) -> str:
+        """
+        Returns string representation of MAC address (with ':' delimiter)
+        for this network interface. Uses Fcntl system call, hence available only for Linux
+        """
+        with socket(AF_INET, SOCK_DGRAM) as socket_obj:
+            import fcntl
+            if_name: bytes = if_name.encode()
+            # according to 'if.h', interface name takes first 16 bytes
+            if_req = struct.pack(LinuxUtils.IF_REQ_FORMAT, if_name[:LinuxUtils.IF_NAME_SIZE_BYTES - 1])
+            if_resp = fcntl.ioctl(socket_obj, LinuxUtils.SIOCGIFHWADDR, if_req)
+            # take 6 MAC bytes
+            hex_mac = if_resp[18:24].hex()
+            return ":".join([hex_mac[i:i+2] for i in range(0, len(hex_mac), 2)])
 
     # noinspection PyTypeChecker
     @staticmethod
