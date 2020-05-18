@@ -108,7 +108,7 @@ class Sniffer:
             socket.SOCK_RAW,
             socket.htons(self.ETH_P_ALL)
         )
-        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, self._sniff_socket, True)
+        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, True)
         self._sniff_socket.setblocking(False)
         self._sniff_socket.bind((self._if_name, 0))
         self._compile_filter()
@@ -117,7 +117,7 @@ class Sniffer:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, self._sniff_socket, False)
+        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, False)
         self._sniff_socket.close()
         self._sniff_socket = None
         self._selector.close()

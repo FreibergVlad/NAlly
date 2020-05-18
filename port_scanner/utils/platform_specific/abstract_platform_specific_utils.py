@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABC
-from socket import socket
 
 
 class AbstractPlatformSpecificUtils(ABC):
@@ -9,12 +8,35 @@ class AbstractPlatformSpecificUtils(ABC):
 
     @staticmethod
     @abstractmethod
-    def toggle_promiscuous_mode(if_name: str, socket_obj: socket, enable: bool):
+    def get_default_interface() -> str:
+        """
+        Returns name of the default network interface
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def get_net_interface_mac(if_name: str) -> str:
+        """
+        Returns MAC address associated with this network interface.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def get_net_interface_ip(if_name: str) -> str:
+        """
+        Returns IP address associated with this network interface.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def toggle_promiscuous_mode(if_name: str, enable: bool):
         """
         Toggles promiscuous mode on network card
 
         :param if_name: network interface name
-        :param socket_obj: socket object
         :param enable: if True, promiscuous mode will be enabled, disabled otherwise
         """
         raise NotImplementedError
