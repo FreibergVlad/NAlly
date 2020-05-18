@@ -1,6 +1,7 @@
 import socket
 from unittest import TestCase
 
+from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
 from port_scanner.layers.inet.ip.ip_packet import IpPacket
 from port_scanner.layers.link.arp.arp_packet import ArpPacket
@@ -10,6 +11,7 @@ from port_scanner.layers.link.proto_type import EtherType
 from port_scanner.layers.transport.tcp.tcp_control_bits import TcpControlBits
 from port_scanner.layers.transport.tcp.tcp_options import TcpOptions
 from port_scanner.layers.transport.tcp.tcp_packet import TcpPacket
+from port_scanner.layers.transport.udp.udp_packet import UdpPacket
 
 ARP_PAYLOAD_TEST_CONTEXT = {
     #
@@ -96,6 +98,47 @@ TCP_IP_PAYLOAD_TEST_CONTEXT = {
     #   Timestamps = 654701382 and 3921945890
     #
     "TCP_PAYLOAD": "01bbdaaa9851d8d84acd45df8010000a07c200000101080a2705f346e9c42522"
+}
+
+UDP_IP_PAYLOAD_TEST_CONTEXT = {
+    #
+    # Destination MAC = "0c:84:dc:a6:bf:c1"
+    # Source MAC = "34:da:b7:87:d5:34"
+    # Type = IPv4
+    #
+    "ETHERNET_HEADER": "0c84dca6bfc134dab787d5340800",
+    #
+    #  DSCP = 0x40 (CS2, Not-ECN)
+    #  total length = 217 bytes
+    #  identification = 53262
+    #  flags = 0
+    #  ttl = 252
+    #  protocol = UDP (17)
+    #  checksum = 0x4e02
+    #  source IP = 86.57.135.193
+    #  destination IP = 192.168.1.32
+    #
+    "IP_PAYLOAD": "454000d9d00e0000fc114e02563987c1c0a80120",
+    #
+    # Source port = 443
+    # Destination port = 39237
+    # Length: 197
+    # Checksum: 0x0000e1b1
+    #
+    "UDP_PAYLOAD": "01bb994500c5e1b1",
+    "APP_LAYER_PAYLOAD": "170100000100000000002000b0538ec1"
+                         "a3bce5c2121d0fd7c95afe68bbe62530"
+                         "4588271c633c5cba1e0c2fe95addb53b"
+                         "cca024908174139935f56e9f6d2b34a6"
+                         "026b5d1109da0ec7017a6de7409a4152"
+                         "543dd0df67d1e490edf207980bef0310"
+                         "a5a16e05a831141b0892a9a05d51e274"
+                         "86bae8e3603d9ee35feff001a90cb5ef"
+                         "061b1b25890c2346ffae43a00e311205"
+                         "40086a6361209eb283549c0e7c645537"
+                         "2a3e7cd40428ac213a39daf9ca9c89ac"
+                         "522b75c58fef3fcd6efd9f52cd"
+
 }
 
 
@@ -187,6 +230,36 @@ class TestEthernetPacket(TestCase):
         )
 
         packet = ethernet_packet / ip_packet / tcp_packet
+        self.assertEqual(packet_hex, packet.to_bytes().hex())
+        self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+
+    def test_udp_ip_payload(self):
+        ethernet_header_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["ETHERNET_HEADER"]
+        ip_payload_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["IP_PAYLOAD"]
+        udp_payload_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["UDP_PAYLOAD"]
+        app_payer_payload = UDP_IP_PAYLOAD_TEST_CONTEXT["APP_LAYER_PAYLOAD"]
+        packet_hex = ethernet_header_hex + ip_payload_hex + udp_payload_hex + app_payer_payload
+
+        ethernet_packet = EthernetPacket(dest_mac="0c:84:dc:a6:bf:c1", source_mac="34:da:b7:87:d5:34")
+        self.assertEqual(ethernet_header_hex, ethernet_packet.to_bytes().hex())
+
+        ip_packet = IpPacket(
+            source_addr_str="86.57.135.193",
+            dest_addr_str="192.168.1.32",
+            dscp=IpDiffServiceValues.CS2,
+            identification=53262,
+            flags=IpFragmentationFlags(),
+            ttl=252,
+            protocol=socket.IPPROTO_UDP
+        )
+
+        udp_packet = UdpPacket(
+            dest_port=39237,
+            source_port=443,
+            payload=bytes.fromhex(app_payer_payload)
+        )
+
+        packet = ethernet_packet / ip_packet / udp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())
         self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
 

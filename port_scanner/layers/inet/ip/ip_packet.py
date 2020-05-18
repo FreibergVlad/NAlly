@@ -2,6 +2,7 @@ import logging
 import socket
 import struct
 import port_scanner.layers.transport.tcp.tcp_packet as tcp_packet
+import port_scanner.layers.transport.udp.udp_packet as udp_packet
 
 from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
@@ -36,7 +37,8 @@ class IpPacket(Packet):
     IP_V4_DEFAULT_TTL = 64
 
     TRANSPORT_LAYER_CONVERTERS = {
-        socket.IPPROTO_TCP: tcp_packet.TcpPacket.from_bytes
+        socket.IPPROTO_TCP: tcp_packet.TcpPacket.from_bytes,
+        socket.IPPROTO_UDP: udp_packet.UdpPacket.from_bytes,
     }
     """
     Defines converters to the Transport layer packets based on the value
