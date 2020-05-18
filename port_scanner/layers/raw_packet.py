@@ -18,7 +18,7 @@ class RawPacket(Packet):
         return RawPacket(bytes_packet)
 
     @property
-    def raw_packet(self):
+    def raw_payload(self) -> bytes:
         return self.__raw_packet
 
     @Packet.upper_layer.setter
@@ -27,5 +27,5 @@ class RawPacket(Packet):
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, RawPacket):
-            return self.raw_packet == other.raw_packet
+            return self.raw_payload == other.raw_payload
         return False
