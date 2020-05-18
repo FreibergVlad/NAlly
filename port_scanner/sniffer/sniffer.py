@@ -4,6 +4,7 @@ import time
 
 from pcapy import BPFProgram
 
+from port_scanner.layers.link.ethernet.ethernet_packet import EthernetPacket
 from port_scanner.layers.link.ethernet.ethernet_utils import EthernetUtils
 from port_scanner.utils.platform_specific.platform_specific_utils import PlatformSpecificUtils
 
@@ -19,7 +20,7 @@ class Sniffer:
 
     def __init__(
             self,
-            if_name: str,
+            if_name: str,  # TODO add auto selecting of default interface
             callback: callable,
             packet_count: int = None,
             promiscuous_mode: bool = True,
@@ -80,7 +81,9 @@ class Sniffer:
         :return: True, if packet was processed successfully, False otherwise
         """
         if self._filter_packet(raw_packet):
-            self._callback(raw_packet)
+            # parse Ethernet header and all upper layers if present
+            ethernet_packet = EthernetPacket.from_bytes(raw_packet)
+            self._callback(ethernet_packet)
             return True
         return False
 
@@ -102,13 +105,21 @@ class Sniffer:
             return self._compiled_filter.filter(raw_packet) != 0
         return True
 
+    def _toggle_promiscuous_mode(self, enable: bool):
+        """
+        Toggles promiscuous mode on network card if
+        corresponding sniffer option enabled
+        """
+        if self._promiscuous_mode:
+            PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, enable)
+
     def __enter__(self):
         self._sniff_socket = socket.socket(
             socket.AF_PACKET,
             socket.SOCK_RAW,
             socket.htons(self.ETH_P_ALL)
         )
-        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, True)
+        self._toggle_promiscuous_mode(True)
         self._sniff_socket.setblocking(False)
         self._sniff_socket.bind((self._if_name, 0))
         self._compile_filter()
@@ -117,7 +128,7 @@ class Sniffer:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, False)
+        self._toggle_promiscuous_mode(False)
         self._sniff_socket.close()
         self._sniff_socket = None
         self._selector.close()
