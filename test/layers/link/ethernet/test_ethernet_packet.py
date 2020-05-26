@@ -171,6 +171,9 @@ class TestEthernetPacket(TestCase):
         ethernet_arp = packet / arp_payload
         self.assertEqual(packet_hex, ethernet_arp.to_bytes().hex())
         self.assertEqual(ethernet_arp, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertTrue(EthernetPacket in ethernet_arp)
+        self.assertTrue(ArpPacket in ethernet_arp)
+        self.assertEqual(arp_payload, ethernet_arp[ArpPacket])
 
     def test_ip_payload(self):
         ethernet_header_hex = IP_PAYLOAD_TEST_CONTEXT["ETHERNET_HEADER"]
@@ -197,6 +200,9 @@ class TestEthernetPacket(TestCase):
         ethernet_ip = packet / ip_packet
         self.assertEqual(packet_hex, ethernet_ip.to_bytes().hex())
         self.assertEqual(ethernet_ip, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertTrue(EthernetPacket in ethernet_ip)
+        self.assertTrue(IpPacket in ethernet_ip)
+        self.assertEqual(ip_packet, ethernet_ip[IpPacket])
 
     def test_tcp_ip_payload(self):
         ethernet_header_hex = TCP_IP_PAYLOAD_TEST_CONTEXT["ETHERNET_HEADER"]
@@ -232,6 +238,9 @@ class TestEthernetPacket(TestCase):
         packet = ethernet_packet / ip_packet / tcp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())
         self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertTrue(EthernetPacket in packet)
+        self.assertTrue(IpPacket in packet)
+        self.assertTrue(TcpPacket in packet)
 
     def test_udp_ip_payload(self):
         ethernet_header_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["ETHERNET_HEADER"]
@@ -262,6 +271,10 @@ class TestEthernetPacket(TestCase):
         packet = ethernet_packet / ip_packet / udp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())
         self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertTrue(EthernetPacket in packet)
+        self.assertTrue(IpPacket in packet)
+        self.assertTrue(UdpPacket in packet)
+        self.assertFalse(TcpPacket in packet)
 
     def test_no_payload(self):
         ethernet_header_hex = NO_PAYLOAD_TEST_CONTEXT["ETHERNET_HEADER"]

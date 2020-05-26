@@ -65,6 +65,19 @@ class Packet(ABC):
         else:
             self.upper_layer.add_payload(payload)
 
+    def __getitem__(self, key):
+        """
+        Layers accessor, accepts layer class and recursively searches it in the payload
+        """
+        if isinstance(self, key):
+            return self
+        if self.upper_layer is None:
+            return None
+        return self.upper_layer[key]
+
+    def __contains__(self, key):
+        return self[key] is not None
+
     def __truediv__(self, other):
         """
         Performs layer stacking. Puts right packet to the payload of the left one.
