@@ -4,6 +4,7 @@ import time
 
 from pcapy import BPFProgram
 
+from port_scanner.config import config
 from port_scanner.layers.link.ethernet.ethernet_packet import EthernetPacket
 from port_scanner.layers.link.ethernet.ethernet_utils import EthernetUtils
 from port_scanner.utils.platform_specific.platform_specific_utils import PlatformSpecificUtils
@@ -14,21 +15,21 @@ class Sniffer:
     Provides interface for packet capturing
     """
 
-    ETH_P_ALL = 3  # TODO move to commons utils?
-    # FIXME should socket buffer size be equal to maximum Ethernet frame size?
+    ETH_P_ALL = 3
     BUFFER_SIZE_BYTES = EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES
 
     def __init__(
             self,
-            if_name: str,  # TODO add auto selecting of default interface
             callback: callable,
+            if_name: str = config.interface_name,
             packet_count: int = None,
             promiscuous_mode: bool = True,
             bpf_filter: str = "",
             timeout: int = None
     ):
         """
-        :param if_name: network interface for capturing
+        :param if_name: network interface for capturing, if not specified,
+            then sniffer will try to pick up the default one
         :param callback: function which will be called when the new packet caught
         :param packet_count: number of packets that should be caught
         :param promiscuous_mode: indicates if sniffer should receive all packets on the LAN, including packets sent to

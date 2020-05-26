@@ -3,6 +3,7 @@ import socket
 import struct
 import port_scanner.layers.transport.tcp.tcp_packet as tcp_packet
 import port_scanner.layers.transport.udp.udp_packet as udp_packet
+from port_scanner.config import config
 
 from port_scanner.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
 from port_scanner.layers.inet.ip.ip_ecn_values import IpEcnValues
@@ -49,8 +50,8 @@ class IpPacket(Packet):
 
     def __init__(
             self,
-            source_addr_str: str,
             dest_addr_str: str,
+            source_addr_str: str = config.interface_ip,
             dscp: IpDiffServiceValues = IpDiffServiceValues.DEFAULT,
             ecn: IpEcnValues = IpEcnValues.NON_ECT,
             identification: int = None,
@@ -62,8 +63,9 @@ class IpPacket(Packet):
         """
         Initializes IPv4 packet instance
 
-        :param source_addr_str: string representation of source IP address
         :param dest_addr_str: string representation of destination IP address
+        :param source_addr_str: string representation of source IP address, if not specified,
+            then local address will be picked up
         :param dscp: DSCP field, instance of IpDiffServiceValues enum
         :param ecn: ECN field, instance of IpEcnValues enum
         :param identification: unique identifier of the fragment in a single IP datagram.

@@ -1,6 +1,7 @@
 import logging
 import struct
 
+from port_scanner.config import config
 from port_scanner.layers.inet.ip.ip_packet import IpPacket
 from port_scanner.layers.link.arp.arp_packet import ArpPacket
 from port_scanner.layers.link.proto_type import EtherType
@@ -33,15 +34,16 @@ class EthernetPacket(Packet):
 
     def __init__(
             self,
-            dest_mac,
-            source_mac,
-            ether_type=EtherType.IPV4,
+            dest_mac: str,
+            source_mac: str = config.interface_mac,
+            ether_type: EtherType = EtherType.IPV4,
     ):
         """
         Initializes Ethernet frame instance
 
         :param dest_mac: destination MAC address, could be either a byte array or hexadecimal string
-        :param source_mac: source MAC address, could be either a byte array or hexadecimal string
+        :param source_mac: source MAC address, could be either a byte array or hexadecimal string,
+            if not specified, then local MAC will be picked up
         :param ether_type: can either be a 2 bytes number which specifies payload size in bytes or EtherType instance
             which indicates which protocol is encapsulated in the payload of the frame
         """
