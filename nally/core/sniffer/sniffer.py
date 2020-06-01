@@ -1,3 +1,4 @@
+import logging
 import socket
 import selectors
 import time
@@ -18,10 +19,12 @@ class Sniffer:
     ETH_P_ALL = 3
     BUFFER_SIZE_BYTES = EthernetUtils.MAX_PAYLOAD_LENGTH_BYTES
 
+    LOG = logging.getLogger("Sniffer")
+
     def __init__(
             self,
             callback: callable,
-            if_name: str = config.interface_name,
+            if_name: str = None,
             packet_count: int = None,
             promiscuous_mode: bool = True,
             bpf_filter: str = "",
@@ -37,41 +40,55 @@ class Sniffer:
         :param bpf_filter: packet filter in BPF format
         :param timeout: specifies timeout in seconds after which sniffer will be terminated
         """
-        self._if_name = if_name
+        self._if_name = if_name if if_name is not None else config.interface_name
         self._packet_count = packet_count
         self._callback = callback
         self._promiscuous_mode = promiscuous_mode
         self._bpf_filter = bpf_filter
         self._timeout = timeout
+        self._stopped = False
         self._sniff_socket = None
         self._compiled_filter = None
 
     def sniff(self) -> int:
-        if self._sniff_socket is None:
-            raise RuntimeError('Sniffer should be used inside context manager')
         processed_count = 0
-        termination_date_seconds = None
-        if self._timeout is not None:
-            termination_date_seconds = time.time() + self._timeout
-        remaining_time_seconds = None
-        while True:
+        try:
+            if self._sniff_socket is None:
+                raise RuntimeError('Sniffer should be used inside context manager')
+            termination_date_seconds = None
             if self._timeout is not None:
-                remaining_time_seconds = termination_date_seconds - time.time()
-                if remaining_time_seconds <= 0:
+                termination_date_seconds = time.time() + self._timeout
+            remaining_time_seconds = None
+            while not self._stopped:
+                if self._timeout is not None:
+                    remaining_time_seconds = termination_date_seconds - time.time()
+                    if remaining_time_seconds <= 0:
+                        break
+                # blocking call, waits until data in socket will be available,
+                # or until timeout expires
+                if not self._selector.select(remaining_time_seconds):
+                    # no data in socket available yet
+                    continue
+                # data is available
+                packet_addr: tuple = self._sniff_socket.recvfrom(self.BUFFER_SIZE_BYTES)
+                packet: bytes = packet_addr[0]
+                if self._process_packet(packet):
+                    processed_count += 1
+                if processed_count == self._packet_count:
                     break
-            # blocking call, waits until data in socket will be available,
-            # or until timeout expires
-            if not self._selector.select(remaining_time_seconds):
-                # no data in socket available yet
-                continue
-            # data is available
-            packet_addr: tuple = self._sniff_socket.recvfrom(self.BUFFER_SIZE_BYTES)
-            packet: bytes = packet_addr[0]
-            if self._process_packet(packet):
-                processed_count += 1
-            if processed_count == self._packet_count:
-                break
-        return processed_count
+            return processed_count
+        except KeyboardInterrupt:
+            self.LOG.info("Keyboard interruption received. Exiting...")
+            return processed_count
+
+    def stop(self):
+        """
+        Provides ability to gracefully terminate the sniffer (makes sense if sniffer is running in
+        the separate thread, see AsyncSniffer class)
+        """
+        if self._stopped:
+            raise RuntimeError("Illegal state: sniffer already terminated")
+        self._stopped = True
 
     def _process_packet(self, raw_packet: bytes) -> bool:
         """
@@ -129,6 +146,7 @@ class Sniffer:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.LOG.debug("Exiting from sniffer, cleaning up resources...")
         self._toggle_promiscuous_mode(False)
         self._sniff_socket.close()
         self._sniff_socket = None
