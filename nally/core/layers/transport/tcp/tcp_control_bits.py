@@ -91,29 +91,64 @@ class TcpControlBits(BitFlags):
             is_flag_set(bits, TcpControlBits.FIN)
         )
 
+    @property
+    def ns(self) -> bool:
+        return self.is_flag_set(self.NS)
+
+    @property
+    def cwr(self) -> bool:
+        return self.is_flag_set(self.CWR)
+
+    @property
+    def ece(self) -> bool:
+        return self.is_flag_set(self.ECE)
+
+    @property
+    def urg(self) -> bool:
+        return self.is_flag_set(self.URG)
+
+    @property
+    def ack(self) -> bool:
+        return self.is_flag_set(self.ACK)
+
+    @property
+    def psh(self) -> bool:
+        return self.is_flag_set(self.PSH)
+
+    @property
+    def rst(self) -> bool:
+        return self.is_flag_set(self.RST)
+
+    @property
+    def syn(self) -> bool:
+        return self.is_flag_set(self.SYN)
+
+    @property
+    def fin(self) -> bool:
+        return self.is_flag_set(self.FIN)
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TcpControlBits):
             return self.flags == other.flags
 
     def __str__(self) -> str:
         flags_str = ""
-        is_flag_set: callable = Utils.is_bit_set
-        if is_flag_set(self.flags, TcpControlBits.NS):
+        if self.ns:
             flags_str += "ns "
-        if is_flag_set(self.flags, TcpControlBits.CWR):
+        if self.cwr:
             flags_str += "cwr "
-        if is_flag_set(self.flags, TcpControlBits.ECE):
+        if self.ece:
             flags_str += "ece "
-        if is_flag_set(self.flags, TcpControlBits.URG):
+        if self.urg:
             flags_str += "urg "
-        if is_flag_set(self.flags, TcpControlBits.ACK):
+        if self.ack:
             flags_str += "ack "
-        if is_flag_set(self.flags, TcpControlBits.PSH):
+        if self.psh:
             flags_str += "psh "
-        if is_flag_set(self.flags, TcpControlBits.RST):
+        if self.rst:
             flags_str += "rst "
-        if is_flag_set(self.flags, TcpControlBits.SYN):
+        if self.syn:
             flags_str += "syn "
-        if is_flag_set(self.flags, TcpControlBits.FIN):
+        if self.fin:
             flags_str += "fin"
         return flags_str.strip()
