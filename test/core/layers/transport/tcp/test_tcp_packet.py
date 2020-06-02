@@ -114,7 +114,6 @@ class TestTcpPacket(TestCase):
                 TcpOptions.NOP,
                 (TcpOptions.TIMESTAMPS, [3252488245, 365238493])
             ]),
-            payload=bytearray(0)
         )
         tcp_packet1 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="35.160.240.60") / tcp_packet1
         self.__test_tcp_packet(PACKET_DUMP_1, tcp_packet1)
@@ -142,8 +141,7 @@ class TestTcpPacket(TestCase):
                 TcpOptions.NOP,
                 (TcpOptions.TIMESTAMPS, [1314978149, 3029537658])
             ]),
-            payload=bytearray.fromhex(PACKET_DUMP_3_PAYLOAD)
-        )
+        ) / bytearray.fromhex(PACKET_DUMP_3_PAYLOAD)
         tcp_packet3 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="10.10.144.153") / tcp_packet3
         self.__test_tcp_packet(PACKET_DUMP_3, tcp_packet3)
 
@@ -159,8 +157,7 @@ class TestTcpPacket(TestCase):
                 TcpOptions.NOP,
                 (TcpOptions.TIMESTAMPS, [4044761679, 555562620])
             ]),
-            payload=bytearray.fromhex(PACKET_DUMP_4_PAYLOAD)
-        )
+        ) / bytearray.fromhex(PACKET_DUMP_4_PAYLOAD)
         tcp_packet4 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="93.186.225.198") / tcp_packet4
         self.__test_tcp_packet(PACKET_DUMP_4, tcp_packet4)
 

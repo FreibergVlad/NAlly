@@ -35,8 +35,7 @@ class TcpPacket(Packet):
             flags: TcpControlBits = TcpControlBits(),
             win_size: int = 65535,
             urg_pointer: int = 0,
-            options: TcpOptions = TcpOptions(),
-            payload: bytearray = bytearray()
+            options: TcpOptions = TcpOptions()
     ):
         """
         Initializes TCP packet instance
@@ -59,7 +58,6 @@ class TcpPacket(Packet):
         :param urg_pointer: Urgent pointer field value. If the URG flag is set, then this 16-bit field
             is an offset from the sequence number indicating the last urgent data byte.
         :param options: Options field. Instance of TcpOptions class.
-        :param payload: packet payload
         """
         super().__init__()
         self.__source_port = TransportLayerUtils.validate_port_num(source_port)
@@ -70,7 +68,6 @@ class TcpPacket(Packet):
         self.__win_size = win_size
         self.__urg_pointer = urg_pointer
         self.__options = options
-        self.__payload = payload
 
     def to_bytes(self):
         options_bytes = self.__options.to_bytes()
@@ -98,19 +95,20 @@ class TcpPacket(Packet):
         # pack header without checksum to the buffer
         struct.pack_into(self.TCP_HEADER_FORMAT, header_buffer, 0, *header_fields)
 
+        payload = self.raw_payload
         # generate pseudo header using underlying IP packet
         pseudo_header = TransportLayerUtils.get_pseudo_header(
             self,
-            data_offset * 4 + len(self.__payload)
+            data_offset * 4 + len(payload)
         )
         # calculate checksum
-        checksum_bytes = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + self.__payload)
+        checksum_bytes = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + payload)
         # checksum takes 16-th and 17-th bytes of the header (counting from 0)
         # see https://tools.ietf.org/html/rfc793#section-3.1 for more details
         header_buffer[16] = checksum_bytes[0]
         header_buffer[17] = checksum_bytes[1]
 
-        return TransportLayerUtils.validate_packet_length(bytes(header_buffer) + options_bytes + self.__payload)
+        return TransportLayerUtils.validate_packet_length(bytes(header_buffer) + options_bytes + payload)
 
     @staticmethod
     def from_bytes(packet_bytes: bytes):
@@ -140,9 +138,7 @@ class TcpPacket(Packet):
         options_len = (data_offset - TcpUtils.TCP_HEADER_LENGTH) * 4
         options = TcpOptions.from_bytes(payload_and_options[:options_len])
 
-        payload = payload_and_options[options_len:]
-
-        return TcpPacket(
+        tcp_header = TcpPacket(
             dest_port=dest_port,
             source_port=source_port,
             sequence_number=seq_num,
@@ -151,8 +147,9 @@ class TcpPacket(Packet):
             win_size=win_size,
             urg_pointer=urg_pointer,
             options=options,
-            payload=payload
         )
+        payload = payload_and_options[options_len:]
+        return tcp_header / payload if len(payload) else tcp_header
 
     @property
     def source_port(self) -> int:
@@ -186,10 +183,6 @@ class TcpPacket(Packet):
     def options(self) -> TcpOptions:
         return self.__options
 
-    @property
-    def payload(self) -> bytearray:
-        return self.__payload
-
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TcpPacket):
             return self.dest_port == other.dest_port and \
@@ -200,8 +193,7 @@ class TcpPacket(Packet):
                    self.flags == other.flags and \
                    self.win_size == other.win_size and \
                    self.urg_pointer == other.urg_pointer and \
-                   self.options == other.options and \
-                   self.payload == other.payload
+                   self.options == other.options
 
     def __str__(self) -> str:
         return f"TCP(dest_port={self.dest_port}, src_port={self.source_port}, " \
