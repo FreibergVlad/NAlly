@@ -24,7 +24,8 @@ from nally.core.layers.transport.tcp.tcp_options import TcpOptions
 #   Dst = 35.160.240.60
 #
 
-PACKET_DUMP_1 = "e93401bb53e4d83ddb2622df801001f5915600000101080ac1dd083515c518dd"
+PACKET_DUMP_1 = "e93401bb53e4d83ddb2622df801001f5" \
+                "915600000101080ac1dd083515c518dd"
 
 #
 # Source port = 44134
@@ -60,11 +61,14 @@ PACKET_DUMP_2 = "ac6601bb8939bac04cf486e3501001f022640000"
 #   Src = 10.10.128.44
 #   Dst = 10.10.144.153
 #
-# Payload = "a9c23efadc549e4ab164aa1c29b3e2eecd8a5e27dfa02f7306705520326f79df2d40bd188c8f82a878b95c173c59b653e51d7fb5"
+# Payload = a9c23efadc549e4ab164aa1c29b3e2eecd8a5e27dfa02f730670
+#           5520326f79df2d40bd188c8f82a878b95c173c59b653e51d7fb5
 #
-PACKET_DUMP_3_PAYLOAD = "a9c23efadc549e4ab164aa1c29b3e2eecd8a5e27dfa02f730670" \
-                        "5520326f79df2d40bd188c8f82a878b95c173c59b653e51d7fb5"
-PACKET_DUMP_3 = "a9d8089129e71a0aadc77287801857bd9f6500000101080a4e60f965b493137a" + PACKET_DUMP_3_PAYLOAD
+PACKET_DUMP_3_PAYLOAD = "a9c23efadc549e4ab164aa1c29b3e2eecd8a5e27dfa0" \
+                        "2f7306705520326f79df2d40bd188c8f82a878b95c173" \
+                        "c59b653e51d7fb5"
+PACKET_DUMP_3 = "a9d8089129e71a0aadc77287801857bd9f650" \
+                "0000101080a4e60f965b493137a" + PACKET_DUMP_3_PAYLOAD
 
 #
 # Source port = 59058
@@ -95,7 +99,8 @@ PACKET_DUMP_4_PAYLOAD = "17030300a8ea868c92a8653042882371" \
                         "0726f9b020bf88b04f6dfc329f1bb182" \
                         "f8a890df26b75043ec99cacb457f64ce" \
                         "d649de4620b7fdb02fa3ce6e4f"
-PACKET_DUMP_4 = "e6b201bb2c80d8bf745c9424801809b3d5e300000101080af1162a4f211d367c" + PACKET_DUMP_4_PAYLOAD
+PACKET_DUMP_4 = "e6b201bb2c80d8bf745c9424801809b3d5e" \
+                "300000101080af1162a4f211d367c" + PACKET_DUMP_4_PAYLOAD
 
 
 class TestTcpPacket(TestCase):
@@ -115,7 +120,10 @@ class TestTcpPacket(TestCase):
                 (TcpOptions.TIMESTAMPS, [3252488245, 365238493])
             ]),
         )
-        tcp_packet1 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="35.160.240.60") / tcp_packet1
+        tcp_packet1 = IpPacket(
+            source_addr_str="192.168.1.32",
+            dest_addr_str="35.160.240.60"
+        ) / tcp_packet1
         self.__test_tcp_packet(PACKET_DUMP_1, tcp_packet1)
 
         tcp_packet2 = TcpPacket(
@@ -126,7 +134,10 @@ class TestTcpPacket(TestCase):
             flags=TcpControlBits(ack=True),
             win_size=496
         )
-        tcp_packet2 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="40.101.18.242") / tcp_packet2
+        tcp_packet2 = IpPacket(
+            source_addr_str="10.10.128.44",
+            dest_addr_str="40.101.18.242"
+        ) / tcp_packet2
         self.__test_tcp_packet(PACKET_DUMP_2, tcp_packet2)
 
         tcp_packet3 = TcpPacket(
@@ -142,7 +153,10 @@ class TestTcpPacket(TestCase):
                 (TcpOptions.TIMESTAMPS, [1314978149, 3029537658])
             ]),
         ) / bytearray.fromhex(PACKET_DUMP_3_PAYLOAD)
-        tcp_packet3 = IpPacket(source_addr_str="10.10.128.44", dest_addr_str="10.10.144.153") / tcp_packet3
+        tcp_packet3 = IpPacket(
+            source_addr_str="10.10.128.44",
+            dest_addr_str="10.10.144.153"
+        ) / tcp_packet3
         self.__test_tcp_packet(PACKET_DUMP_3, tcp_packet3)
 
         tcp_packet4 = TcpPacket(
@@ -158,8 +172,121 @@ class TestTcpPacket(TestCase):
                 (TcpOptions.TIMESTAMPS, [4044761679, 555562620])
             ]),
         ) / bytearray.fromhex(PACKET_DUMP_4_PAYLOAD)
-        tcp_packet4 = IpPacket(source_addr_str="192.168.1.32", dest_addr_str="93.186.225.198") / tcp_packet4
+        tcp_packet4 = IpPacket(
+            source_addr_str="192.168.1.32",
+            dest_addr_str="93.186.225.198"
+        ) / tcp_packet4
         self.__test_tcp_packet(PACKET_DUMP_4, tcp_packet4)
+
+    def test_is_response(self):
+        # 'syn' sent, wait for 'syn/ack'
+        tcp_packet = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            sequence_number=2302261952,
+            flags=TcpControlBits(syn=True)
+        )
+        tcp_response = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            ack_number=2302261952 + 1,
+            flags=TcpControlBits(syn=True, ack=True)
+        )
+        self.assertTrue(tcp_response.is_response(tcp_packet))
+
+        # 'syn/ack' sent, wait for 'ack'
+        tcp_packet2 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            sequence_number=2302261952,
+            flags=TcpControlBits(syn=True, ack=True)
+        )
+        tcp_response2 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            ack_number=2302261952 + 1,
+            flags=TcpControlBits(ack=True)
+        )
+        self.assertTrue(tcp_response2.is_response(tcp_packet2))
+
+        # 'syn' sent, wait for 'rst' received
+        tcp_packet3 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            flags=TcpControlBits(syn=True)
+        )
+        tcp_response3 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            flags=TcpControlBits(rst=True)
+        )
+        self.assertTrue(tcp_response3.is_response(tcp_packet3))
+
+        # ports mismatch
+        tcp_packet4 = TcpPacket(
+            source_port=44134,
+            dest_port=443
+        )
+        tcp_response4 = TcpPacket(
+            source_port=443,
+            dest_port=44135
+        )
+        self.assertFalse(tcp_response4.is_response(tcp_packet4))
+
+        # 'syn' sent, but no 'syn/ack' received
+        tcp_packet5 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            sequence_number=2302261952,
+            flags=TcpControlBits(syn=True)
+        )
+        tcp_response5 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            ack_number=2302261953,
+        )
+        self.assertFalse(tcp_response5.is_response(tcp_packet5))
+
+        # 'syn' sent, 'syn/ack' received, but seq/ack numbers mismatch
+        tcp_packet6 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            sequence_number=2302261952,
+            flags=TcpControlBits(syn=True)
+        )
+        tcp_response6 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            flags=TcpControlBits(syn=True, ack=True)
+        )
+        self.assertFalse(tcp_response6.is_response(tcp_packet6))
+
+        # 'rst' sent, no response expected
+        tcp_packet7 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            flags=TcpControlBits(rst=True)
+        )
+        tcp_response7 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+        )
+        self.assertFalse(tcp_response7.is_response(tcp_packet7))
+
+        # 20 bytes of data sent, 'ack' expected
+        tcp_packet8 = TcpPacket(
+            source_port=44134,
+            dest_port=443,
+            flags=TcpControlBits(ack=True),
+            sequence_number=2302261952,
+        ) / bytes(20)
+        tcp_response8 = TcpPacket(
+            source_port=443,
+            dest_port=44134,
+            flags=TcpControlBits(ack=True),
+            ack_number=2302261952 + 20
+        )
+        self.assertTrue(tcp_response8.is_response(tcp_packet8))
 
     def __test_tcp_packet(self, expected_hex_dump: str, packet: IpPacket):
         self.assertTrue(isinstance(packet, IpPacket))

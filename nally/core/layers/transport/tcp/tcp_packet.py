@@ -176,6 +176,47 @@ class TcpPacket(Packet):
         payload = payload_and_options[options_len:]
         return tcp_header / payload if len(payload) else tcp_header
 
+    def is_response(self, packet: Packet) -> bool:
+        if TcpPacket not in packet:
+            return False
+        tcp_layer: TcpPacket = packet[TcpPacket]
+        # TCP packet with RST flag has no response
+        if tcp_layer.flags.rst:
+            return False
+        # check that destination and source ports are correct
+        if self.dest_port != tcp_layer.source_port \
+                or self.source_port != tcp_layer.dest_port:
+            return False
+        # if RST set, return True immediately, since any packet
+        # can be answered with RST flag
+        if self.flags.rst:
+            return True
+        if tcp_layer.flags.syn:  # check if SYN set
+            if tcp_layer.flags.ack:
+                # if SYN/ACK set, then wait for ACK
+                if not self.flags.ack:
+                    return False
+            else:
+                # if only SYN set, then wait for SYN/ACK
+                if not (self.flags.syn and self.flags.ack):
+                    return False
+            # we expect that our ACK SN will be equal to SN + 1 of other packet
+            if self.ack_number != tcp_layer.sequence_number + 1:
+                return False
+        else:
+            # we expect that our ACK SN will be equal
+            # to SN + length of the sent payload of the other packet
+            if tcp_layer.sequence_number + len(tcp_layer.raw_payload) \
+                    != self.ack_number:
+                return False
+        # here we know that 'self' is a valid response on TCP layer,
+        # now delegate further processing to the upper layer if one exists
+        return (
+            self.upper_layer.is_response(packet)
+            if self.upper_layer is not None
+            else True
+        )
+
     @property
     def source_port(self) -> int:
         return self.__source_port

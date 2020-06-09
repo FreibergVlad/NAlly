@@ -17,9 +17,11 @@ class TestTcpControlBits(TestCase):
             ack=True, psh=True, rst=True, syn=True, fin=True
         )
         self.assertTrue(
-            tcp_control_flags.ns and tcp_control_flags.cwr and tcp_control_flags.urg and
-            tcp_control_flags.ece and tcp_control_flags.ack and tcp_control_flags.psh and
-            tcp_control_flags.rst and tcp_control_flags.syn and tcp_control_flags.fin
+            tcp_control_flags.ns and tcp_control_flags.cwr
+            and tcp_control_flags.urg and tcp_control_flags.ece
+            and tcp_control_flags.ack and tcp_control_flags.psh
+            and tcp_control_flags.rst and tcp_control_flags.syn
+            and tcp_control_flags.fin
         )
         self.assertEqual(self.FLAGS_ALL, tcp_control_flags.flags)
 
@@ -30,9 +32,10 @@ class TestTcpControlBits(TestCase):
         self.assertTrue(tcp_control_flags.is_flag_set(TcpControlBits.ACK))
         self.assertTrue(tcp_control_flags.is_flag_set(TcpControlBits.PSH))
         self.assertFalse(
-            tcp_control_flags.ns or tcp_control_flags.cwr or tcp_control_flags.urg or
-            tcp_control_flags.ece or tcp_control_flags.rst or tcp_control_flags.syn or
-            tcp_control_flags.fin
+            tcp_control_flags.ns or tcp_control_flags.cwr
+            or tcp_control_flags.urg or tcp_control_flags.ece
+            or tcp_control_flags.rst or tcp_control_flags.syn
+            or tcp_control_flags.fin
         )
         self.assertTrue(tcp_control_flags.ack and tcp_control_flags.psh)
 

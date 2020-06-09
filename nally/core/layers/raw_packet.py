@@ -18,6 +18,9 @@ class RawPacket(Packet):
     def from_bytes(bytes_packet: bytes):
         return RawPacket(bytes_packet)
 
+    def is_response(self, packet) -> bool:
+        return True
+
     @property
     def raw_payload(self) -> bytes:
         return self.__raw_packet

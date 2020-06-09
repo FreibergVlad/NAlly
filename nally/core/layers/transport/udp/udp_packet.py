@@ -84,6 +84,22 @@ class UdpPacket(Packet):
         udp_header = UdpPacket(dest_port=dest_port, source_port=source_port)
         return udp_header / payload if len(payload) > 0 else udp_header
 
+    def is_response(self, packet) -> bool:
+        if UdpPacket not in packet:
+            return False
+        udp_layer = packet[UdpPacket]
+        # check that destination and source ports are correct
+        if self.dest_port != udp_layer.source_port \
+                or self.source_port != udp_layer.dest_port:
+            return False
+        # here we know that 'self' is a valid response on UDP layer,
+        # now delegate further processing to the upper layer if one exists
+        return (
+            self.upper_layer.is_response(packet)
+            if self.upper_layer is not None
+            else True
+        )
+
     @property
     def dest_port(self) -> int:
         return self.__dest_port

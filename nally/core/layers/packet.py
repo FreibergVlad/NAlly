@@ -29,6 +29,12 @@ class Packet(ABC):
         """
         raise NotImplementedError
 
+    def is_response(self, packet) -> bool:
+        """
+        Returns true if 'self' is a valid response for the passed packet
+        """
+        raise NotImplementedError
+
     @property
     def raw_payload(self) -> bytes:
         """

@@ -19,7 +19,10 @@ class TestTcpOptions(TestCase):
             (TcpOptions.WINDOW_SCALE, 7)
         ])
         options_bytes = tcp_options.to_bytes()
-        self.assertEqual("020405b40402080a2dedb3580000000001030307", options_bytes.hex())
+        self.assertEqual(
+            "020405b40402080a2dedb3580000000001030307",
+            options_bytes.hex()
+        )
         self.assertEqual(tcp_options, TcpOptions.from_bytes(options_bytes))
 
         tcp_options = TcpOptions([
@@ -31,7 +34,10 @@ class TestTcpOptions(TestCase):
             (TcpOptions.SACK, [3875764423, 3875765791])
         ])
         options_bytes = tcp_options.to_bytes()
-        self.assertEqual("0101080a030e8a8420f13e4a0101050ae70378c7e7037e1f", options_bytes.hex())
+        self.assertEqual(
+            "0101080a030e8a8420f13e4a0101050ae70378c7e7037e1f",
+            options_bytes.hex()
+        )
         self.assertEqual(tcp_options, TcpOptions.from_bytes(options_bytes))
 
         tcp_options = TcpOptions([
@@ -43,7 +49,10 @@ class TestTcpOptions(TestCase):
             (TcpOptions.SACK, [7843280, 8170232, 7803608, 7839176])
         ])
         options_bytes = tcp_options.to_bytes()
-        self.assertEqual("0101080aa95dddc7bb9bc605010105120077add0007caaf8007712d800779dc8", options_bytes.hex())
+        self.assertEqual(
+            "0101080aa95dddc7bb9bc605010105120077add0007caaf8007712d800779dc8",
+            options_bytes.hex()
+        )
         self.assertEqual(tcp_options, TcpOptions.from_bytes(options_bytes))
 
         tcp_options = TcpOptions([
@@ -56,7 +65,9 @@ class TestTcpOptions(TestCase):
         self.assertEqual(tcp_options, TcpOptions.from_bytes(options_bytes))
 
         # more that max allowed 40 bytes
-        tcp_options = TcpOptions([(TcpOptions.SACK, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])])
+        tcp_options = TcpOptions(
+            [(TcpOptions.SACK, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])]
+        )
         self.assertRaises(ValueError, tcp_options.to_bytes)
 
         tcp_options = TcpOptions(["UNKNOWN"])
@@ -66,4 +77,8 @@ class TestTcpOptions(TestCase):
         self.assertRaises(ValueError, TcpOptions, [1])
         self.assertRaises(ValueError, TcpOptions, [(1, 2, 3)])
         self.assertRaises(ValueError, TcpOptions, [(1, 2)])
-        self.assertRaises(ValueError, TcpOptions, [("OPTION", "invalid value")])
+        self.assertRaises(
+            ValueError,
+            TcpOptions,
+            [("OPTION", "invalid value")]
+        )
