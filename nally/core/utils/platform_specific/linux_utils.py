@@ -2,7 +2,8 @@ import ctypes
 import struct
 from socket import socket, AF_INET, SOCK_DGRAM, inet_ntoa
 
-from nally.core.utils.platform_specific.abstract_platform_specific_utils import AbstractPlatformSpecificUtils
+from nally.core.utils.platform_specific.abstract_platform_specific_utils \
+    import AbstractPlatformSpecificUtils
 
 
 class LinuxUtils(AbstractPlatformSpecificUtils):
@@ -62,26 +63,34 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
                 destination = fields[1]
                 flags = fields[3]
                 # check default gateway and RTF_GATEWAY flag
-                if destination == '00000000' and int(flags, 16) & LinuxUtils.RTF_GATEWAY:
+                if destination == '00000000' \
+                        and int(flags, 16) & LinuxUtils.RTF_GATEWAY:
                     return fields[0]
-        raise RuntimeError("Can't find default network interface in /proc/net/route")
+        raise RuntimeError("Can't find default network "
+                           "interface in /proc/net/route")
 
     # noinspection PyTypeChecker
     @staticmethod
     def get_net_interface_mac(if_name: str) -> str:
         """
         Returns string representation of MAC address (with ':' delimiter)
-        for this network interface. Uses Fcntl system call, hence available only for Linux
+        for this network interface. Uses Fcntl system call,
+        hence available only for Linux
         """
         with socket(AF_INET, SOCK_DGRAM) as socket_obj:
             import fcntl
             if_name: bytes = if_name.encode()
             # according to 'if.h', interface name takes first 16 bytes
-            if_req = struct.pack(LinuxUtils.IF_REQ_FORMAT, if_name[:LinuxUtils.IF_NAME_SIZE_BYTES - 1])
+            if_req = struct.pack(
+                LinuxUtils.IF_REQ_FORMAT,
+                if_name[:LinuxUtils.IF_NAME_SIZE_BYTES - 1]
+            )
             if_resp = fcntl.ioctl(socket_obj, LinuxUtils.SIOCGIFHWADDR, if_req)
             # take 6 MAC bytes
             hex_mac = if_resp[18:24].hex()
-            return ":".join([hex_mac[i:i+2] for i in range(0, len(hex_mac), 2)])
+            return ":".join(
+                [hex_mac[i:i+2] for i in range(0, len(hex_mac), 2)]
+            )
 
     # noinspection PyTypeChecker
     @staticmethod
@@ -94,7 +103,10 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
             import fcntl
             if_name: bytes = if_name.encode()
             # according to 'if.h', interface name takes first 16 bytes
-            if_req = struct.pack(LinuxUtils.IF_REQ_FORMAT, if_name[:LinuxUtils.IF_NAME_SIZE_BYTES - 1])
+            if_req = struct.pack(
+                LinuxUtils.IF_REQ_FORMAT,
+                if_name[:LinuxUtils.IF_NAME_SIZE_BYTES - 1]
+            )
             if_resp = fcntl.ioctl(socket_obj, LinuxUtils.SIOCGIFADDR, if_req)
             # take 4 IP bytes
             raw_ip = if_resp[20:24]
@@ -104,11 +116,12 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
     @staticmethod
     def toggle_promiscuous_mode(if_name: str, enable: bool):
         """
-        Toggles promiscuous mode on network card using Fcntl system calls. Available
-        only for Linux
+        Toggles promiscuous mode on network card using Fcntl system calls.
+        Available only for Linux
 
         :param if_name: network interface name
-        :param enable: if True, promiscuous mode will be enabled, disabled otherwise
+        :param enable: if True, promiscuous mode will be enabled,
+            disabled otherwise
         """
         with socket(AF_INET, SOCK_DGRAM) as socket_obj:
 
@@ -124,7 +137,10 @@ class LinuxUtils(AbstractPlatformSpecificUtils):
             request.if_name = if_name.encode()
             fcntl.ioctl(socket_obj, LinuxUtils.SIOCGIFFLAGS, request)
             if enable:
-                request.if_flags |= LinuxUtils.IFF_PROMISC  # add the promiscuous flag
+                # add the promiscuous flag
+                request.if_flags |= LinuxUtils.IFF_PROMISC
             else:
-                request.if_flags ^= LinuxUtils.IFF_PROMISC  # remove the promiscuous flag
-            fcntl.ioctl(socket_obj, LinuxUtils.SIOCSIFFLAGS, request)  # update
+                # remove the promiscuous flag
+                request.if_flags ^= LinuxUtils.IFF_PROMISC
+            # update
+            fcntl.ioctl(socket_obj, LinuxUtils.SIOCSIFFLAGS, request)

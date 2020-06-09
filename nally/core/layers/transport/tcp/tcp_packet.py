@@ -4,7 +4,8 @@ from nally.core.layers.packet import Packet
 from nally.core.layers.transport.tcp.tcp_control_bits import TcpControlBits
 from nally.core.layers.transport.tcp.tcp_utils import TcpUtils
 from nally.core.layers.transport.tcp.tcp_options import TcpOptions
-from nally.core.layers.transport.transport_layer_utils import TransportLayerUtils
+from nally.core.layers.transport.transport_layer_utils \
+    import TransportLayerUtils
 from nally.core.utils.utils import Utils
 
 
@@ -40,23 +41,32 @@ class TcpPacket(Packet):
         """
         Initializes TCP packet instance
 
-        :param source_port: Source port field value, integer in range [0; 65535]
-        :param dest_port: Destination port field value, integer in range [0; 65535]
+        :param source_port: Source port field value,
+            integer in range [0; 65535]
+        :param dest_port: Destination port field value,
+            integer in range [0; 65535]
         :param sequence_number: Sequence number field value. Has a dual role:
-            If the SYN flag is set (1), then this is the initial sequence number.
-                The sequence number of the actual first data byte and the acknowledged number
-                in the corresponding ACK are then this sequence number plus 1.
-            If the SYN flag is clear (0), then this is the accumulated sequence number of the
-                first data byte of this segment for the current session.
-        :param ack_number: Acknowledgment number field value. If the ACK flag is set then the
-            value of this field is the next sequence number that the sender of the ACK is expecting.
-            This acknowledges receipt of all prior bytes (if any). The first ACK sent by each end
-            acknowledges the other end's initial sequence number itself, but no data.
-        :param flags: Flags field. Instance of TcpControlBits class. Contains 9 1-bit flags (control bits)
-        :param win_size: Window size field value. The size of the receive window, which specifies
-            the number of window size units that the sender of this segment is currently willing to receive.
-        :param urg_pointer: Urgent pointer field value. If the URG flag is set, then this 16-bit field
-            is an offset from the sequence number indicating the last urgent data byte.
+            If the SYN flag is set (1), then this is the initial
+                sequence number. The sequence number of the actual first data
+                byte and the acknowledged number in the corresponding ACK are
+                then this sequence number plus 1.
+            If the SYN flag is clear (0), then this is the accumulated sequence
+                number of the first data byte of this segment for the current
+                session.
+        :param ack_number: Acknowledgment number field value. If the ACK flag
+            is set then the value of this field is the next sequence number
+            that the sender of the ACK is expecting.This acknowledges receipt
+            of all prior bytes (if any). The first ACK sent by each end
+            acknowledges the other end's initial sequence number itself,
+            but no data.
+        :param flags: Flags field. Instance of TcpControlBits class. Contains
+            9 1-bit flags (control bits)
+        :param win_size: Window size field value. The size of the receive
+            window, which specifies the number of window size units that the
+            sender of this segment is currently willing to receive.
+        :param urg_pointer: Urgent pointer field value. If the URG flag is set,
+            then this 16-bit field is an offset from the sequence number
+            indicating the last urgent data byte.
         :param options: Options field. Instance of TcpOptions class.
         """
         super().__init__()
@@ -72,11 +82,13 @@ class TcpPacket(Packet):
     def to_bytes(self):
         options_bytes = self.__options.to_bytes()
         # make sure that options bit length is divisible by 32
-        # should not fail here since all required padding already performed in TcpOptions class
+        # should not fail here since all required
+        # padding already performed in TcpOptions class
         assert len(options_bytes) % 4 == 0
         # calculate data offset value in 32-bits words
         data_offset = TcpUtils.TCP_HEADER_LENGTH + len(options_bytes) // 4
-        # concat 4 data offset bits + 3 reserved zero bits + 9 control bit flags
+        # concat 4 data offset bits + 3 reserved zero bits + 9
+        # control bit flags
         data_offset_flags = data_offset << 12 | self.__flags.flags
 
         header_fields = [
@@ -93,7 +105,12 @@ class TcpPacket(Packet):
         # allocate 20 bytes buffer to put header in
         header_buffer = bytearray(TcpUtils.TCP_HEADER_LENGTH_BYTES)
         # pack header without checksum to the buffer
-        struct.pack_into(self.TCP_HEADER_FORMAT, header_buffer, 0, *header_fields)
+        struct.pack_into(
+            self.TCP_HEADER_FORMAT,
+            header_buffer,
+            0,  # leave checksum field empty
+            *header_fields
+        )
 
         payload = self.raw_payload
         # generate pseudo header using underlying IP packet
@@ -102,19 +119,26 @@ class TcpPacket(Packet):
             data_offset * 4 + len(payload)
         )
         # calculate checksum
-        checksum_bytes = Utils.calc_checksum(pseudo_header + header_buffer + options_bytes + payload)
+        checksum_bytes = Utils.calc_checksum(
+            pseudo_header + header_buffer + options_bytes + payload
+        )
         # checksum takes 16-th and 17-th bytes of the header (counting from 0)
         # see https://tools.ietf.org/html/rfc793#section-3.1 for more details
         header_buffer[16] = checksum_bytes[0]
         header_buffer[17] = checksum_bytes[1]
 
-        return TransportLayerUtils.validate_packet_length(bytes(header_buffer) + options_bytes + payload)
+        return TransportLayerUtils.validate_packet_length(
+            bytes(header_buffer) + options_bytes + payload
+        )
 
     @staticmethod
     def from_bytes(packet_bytes: bytes):
         header_bytes = packet_bytes[:TcpUtils.TCP_HEADER_LENGTH_BYTES]
         payload_and_options = packet_bytes[TcpUtils.TCP_HEADER_LENGTH_BYTES:]
-        header_fields = struct.unpack(TcpPacket.TCP_HEADER_FORMAT, header_bytes)
+        header_fields = struct.unpack(
+            TcpPacket.TCP_HEADER_FORMAT,
+            header_bytes
+        )
 
         source_port = header_fields[0]
         dest_port = header_fields[1]
@@ -122,7 +146,8 @@ class TcpPacket(Packet):
         ack_num = header_fields[3]
         data_offset_flags = header_fields[4]
         win_size = header_fields[5]
-        # 6-th item is checksum, don't need to extract it, since it will be calculated later
+        # 6-th item is checksum, don't need to extract it,
+        # since it will be calculated later
         urg_pointer = header_fields[7]
 
         # take first 4 bits
@@ -196,7 +221,11 @@ class TcpPacket(Packet):
                    self.options == other.options
 
     def __str__(self) -> str:
-        return f"TCP(dest_port={self.dest_port}, src_port={self.source_port}, " \
-               f"seq_num={self.sequence_number}, ack_num={self.ack_number}, " \
-               f"flags=({self.flags}), win_size={self.win_size}, urg_pointer={self.urg_pointer}, " \
+        return f"TCP(dest_port={self.dest_port}, " \
+               f"src_port={self.source_port}, " \
+               f"seq_num={self.sequence_number}, " \
+               f"ack_num={self.ack_number}, " \
+               f"flags=({self.flags}), " \
+               f"win_size={self.win_size}, " \
+               f"urg_pointer={self.urg_pointer}, " \
                f"options=({self.options}))"

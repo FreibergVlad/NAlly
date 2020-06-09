@@ -36,12 +36,18 @@ class ArpPacket(Packet):
         Initializes ARP packet instance
 
         :param operation: Operation field, instance of ArpOperation enum
-        :param sender_hw_address: sender hardware address, format depends on HTYPE field
-        :param sender_proto_address: sender protocol address, format depends on PTYPE field
-        :param target_hw_address: target hardware address, format depends on HTYPE field
-        :param target_proto_address: target protocol address, format depends on PTYPE field
-        :param hardware_type: HTYPE field, instance of ArpHardwareType enum, Ethernet by default
-        :param protocol_type: PTYPE field, instance of EtherType enum, IPv4 by default
+        :param sender_hw_address: sender hardware address, format depends on
+            HTYPE field
+        :param sender_proto_address: sender protocol address, format depends on
+            PTYPE field
+        :param target_hw_address: target hardware address, format depends on
+            HTYPE field
+        :param target_proto_address: target protocol address, format depends on
+            PTYPE field
+        :param hardware_type: HTYPE field, instance of ArpHardwareType enum,
+            Ethernet by default
+        :param protocol_type: PTYPE field, instance of EtherType enum,
+            IPv4 by default
         """
         super().__init__()
         self.__hardware_type = hardware_type
@@ -49,10 +55,22 @@ class ArpPacket(Packet):
         self.__operation = operation
         self.__hw_len = ArpUtils.resolve_hw_len(hardware_type)
         self.__proto_len = ArpUtils.resolve_proto_len(protocol_type)
-        self.__sender_hw_address = ArpUtils.validate_hw_addr(sender_hw_address, hardware_type)
-        self.__sender_proto_address = ArpUtils.validate_proto_addr(sender_proto_address, protocol_type)
-        self.__target_hw_address = ArpUtils.validate_hw_addr(target_hw_address, hardware_type)
-        self.__target_proto_address = ArpUtils.validate_proto_addr(target_proto_address, protocol_type)
+        self.__sender_hw_address = ArpUtils.validate_hw_addr(
+            sender_hw_address,
+            hardware_type
+        )
+        self.__sender_proto_address = ArpUtils.validate_proto_addr(
+            sender_proto_address,
+            protocol_type
+        )
+        self.__target_hw_address = ArpUtils.validate_hw_addr(
+            target_hw_address,
+            hardware_type
+        )
+        self.__target_proto_address = ArpUtils.validate_proto_addr(
+            target_proto_address,
+            protocol_type
+        )
 
     def to_bytes(self):
         packet_without_addr = struct.pack(
@@ -71,7 +89,10 @@ class ArpPacket(Packet):
     def from_bytes(bytes_packet: bytes):
         packet_without_addr_len = struct.calcsize(ArpPacket.ARP_PACKET_FORMAT)
         packet_bytes_without_addr = bytes_packet[:packet_without_addr_len]
-        packet_without_addr = struct.unpack_from(ArpPacket.ARP_PACKET_FORMAT, packet_bytes_without_addr)
+        packet_without_addr = struct.unpack_from(
+            ArpPacket.ARP_PACKET_FORMAT,
+            packet_bytes_without_addr
+        )
         hw_type = ArpHardwareType(packet_without_addr[0])
         proto_type = EtherType(packet_without_addr[1])
         hw_len = packet_without_addr[2]

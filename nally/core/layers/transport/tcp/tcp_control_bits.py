@@ -4,7 +4,8 @@ from nally.core.utils.utils import Utils
 
 class TcpControlBits(BitFlags):
     """
-    Represents 9 TCP control flags, can be used for storing, setting or retrieving flags
+    Represents 9 TCP control flags, can be used for storing, setting or
+    retrieving flags
     """
 
     NS = 256
@@ -42,22 +43,29 @@ class TcpControlBits(BitFlags):
         Initialises TCPControlBits instance
 
         :param bool ns: ECN-nonce - concealment protection
-        :param bool cwr: Congestion window reduced (CWR) flag is set by the sending host to indicate that it received a
-            TCP segment with the ECE flag set and had responded in congestion control mechanism
-        :param bool ece: ECN-Echo has a dual role, depending on the value of the SYN flag. It indicates:
+        :param bool cwr: Congestion window reduced (CWR) flag is set by the
+            sending host to indicate that it received a TCP segment with the
+            ECE flag set and had responded in congestion control mechanism
+        :param bool ece: ECN-Echo has a dual role, depending on the value of
+            the SYN flag. It indicates:
             * If the SYN flag is set (1), that the TCP peer is ECN capable.
-            * If the SYN flag is clear (0), that a packet with Congestion Experienced flag set (ECN=11) in the IP header
-            was received during normal transmission. This serves as an indication of network congestion
-            (or impending congestion) to the TCP sender.
+            * If the SYN flag is clear (0), that a packet with Congestion
+                Experienced flag set (ECN=11) in the IP header was received
+                during normal transmission. This serves as an indication of
+                network congestion (or impending congestion) to the TCP sender.
         :param bool urg: indicates that the Urgent pointer field is significant
-        :param bool ack: indicates that the Acknowledgment field is significant. All packets after the initial SYN
-            packet sent by the client should have this flag set
-        :param bool psh: push function. Asks to push the buffered data to the receiving application
+        :param bool ack: indicates that the Acknowledgment field is
+            significant. All packets after the initial SYN packet sent by the
+            client should have this flag set
+        :param bool psh: push function. Asks to push the buffered data to the
+            receiving application
         :param bool rst: reset the connection
-        :param bool syn: synchronize sequence numbers. Only the first packet sent from each end should have this flag
-            set. Some other flags and fields change meaning based on this flag, and some are only valid when it is set,
-            and others when it is clear
-        :param bool fin: means that current packet is the last packet from sender
+        :param bool syn: synchronize sequence numbers. Only the first packet
+            sent from each end should have this flag set. Some other flags and
+            fields change meaning based on this flag, and some are only valid
+            when it is set, and others when it is clear
+        :param bool fin: means that current packet is the last packet
+            from sender
         """
         super().__init__()
         self.set_flag(self.NS, ns)

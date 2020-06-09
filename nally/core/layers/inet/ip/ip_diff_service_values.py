@@ -3,20 +3,26 @@ from enum import IntEnum
 
 class IpDiffServiceValues(IntEnum):
     """
-    Differentiated services is an extension of IP protocol that specifies a simple and scalable mechanism for
-    classifying and managing network traffic and providing quality of service (QoS) on modern IP networks.
-    It can, for example, be used to provide low-latency to critical network traffic such as voice or streaming media
-    while providing simple best-effort service to non-critical services such as web traffic or file transfers.
+    Differentiated services is an extension of IP protocol that specifies a
+    simple and scalable mechanism for classifying and managing network traffic
+    and providing quality of service (QoS) on modern IP networks.
+    It can, for example, be used to provide low-latency to critical network
+    traffic such as voice or streaming media while providing simple best-effort
+    service to non-critical services such as web traffic or file transfers.
 
-    DiffService uses a 6-bit differentiated services code point (DSCP) in the 8-bit differentiated services
-    field (DS field) in the IP header for packet classification purposes. The DS field replaces the outdated
-    IPv4 TOS field.
+    DiffService uses a 6-bit differentiated services code point (DSCP) in the
+    8-bit differentiated services field (DS field) in the IP header for packet
+    classification purposes. The DS field replaces the outdated IPv4 TOS field.
 
-    This class stores values for the following commonly defined per-hop behaviors:
+    This class stores values for the following commonly defined per-hop
+    behaviors:
         * Default Forwarding (DF) PHB — which is typically best-effort traffic
-        * Expedited Forwarding (EF) PHB — dedicated to low-loss, low-latency traffic
-        * Assured Forwarding (AF) PHB — gives assurance of delivery under prescribed conditions
-        * Class Selector (CS) PHBs — which maintain backward compatibility with the IP precedence field.
+        * Expedited Forwarding (EF) PHB — dedicated to low-loss, low-latency
+            traffic
+        * Assured Forwarding (AF) PHB — gives assurance of delivery under
+            prescribed conditions
+        * Class Selector (CS) PHBs — which maintain backward compatibility with
+            the IP precedence field.
 
     See the following RFC documents for more details:
         * https://tools.ietf.org/html/rfc2474

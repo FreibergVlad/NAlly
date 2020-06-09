@@ -3,7 +3,8 @@ from nally.core.layers.packet import Packet
 
 class RawPacket(Packet):
     """
-    Raw implementation of Packet interface. Actually, just a holder of raw bytes
+    Raw implementation of Packet interface.
+    Actually, just a holder of raw bytes
     """
 
     def __init__(self, raw_packet):

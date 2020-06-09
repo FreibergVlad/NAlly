@@ -32,7 +32,9 @@ class TransportLayerUtils:
     @staticmethod
     def validate_packet_length(packet: bytes):
         if len(packet) > TransportLayerUtils.PACKET_MAX_LENGTH_BYTES:
-            raise ValueError(f"packet size can't be larger than {TransportLayerUtils.PACKET_MAX_LENGTH_BYTES} bytes")
+            raise ValueError(f"packet size can't be larger than "
+                             f"{TransportLayerUtils.PACKET_MAX_LENGTH_BYTES} "
+                             f"bytes")
         return packet
 
     @staticmethod
@@ -41,7 +43,8 @@ class TransportLayerUtils:
         Constructs pseudo header used to TCP and UDP checksum computation
 
         :param packet: TCP or UDP packet with IP underlying
-        :param segment_len: length of the packet in bytes including payload length
+        :param segment_len: length of the packet in bytes
+            including payload length
         :return: 12 bytes pseudo header
         """
         from nally.core.layers.inet.ip.ip_packet import IpPacket

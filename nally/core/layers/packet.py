@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 
 class Packet(ABC):
     """
-    Abstract class which defines the base interface for all network packets implementation
+    Abstract class which defines the base interface for all network packets
+    implementation
     """
 
     def __init__(self):
@@ -14,7 +15,8 @@ class Packet(ABC):
     @abstractmethod
     def to_bytes(self):
         """
-        Converts 'Packet' instance to the 'bytes' representation ready to be sent over the network
+        Converts 'Packet' instance to the 'bytes' representation ready to be
+        sent over the network
         """
         raise NotImplementedError
 
@@ -22,7 +24,8 @@ class Packet(ABC):
     @abstractmethod
     def from_bytes(bytes_packet: bytes):
         """
-        Converts raw bytes to the Packet instance, also tries to parse upper protocols layers
+        Converts raw bytes to the Packet instance, also tries to parse upper
+        protocols layers
         """
         raise NotImplementedError
 
@@ -31,7 +34,11 @@ class Packet(ABC):
         """
         Returns 'bytes' representation of all upper protocols layers if present
         """
-        return self.upper_layer.to_bytes() if self.upper_layer is not None else bytes()
+        return (
+            self.upper_layer.to_bytes()
+            if self.upper_layer is not None
+            else bytes()
+        )
 
     @property
     def upper_layer(self):
@@ -67,7 +74,8 @@ class Packet(ABC):
 
     def __getitem__(self, key):
         """
-        Layers accessor, accepts layer class and recursively searches it in the payload
+        Layers accessor, accepts layer class and recursively searches
+        it in the payload
         """
         if isinstance(self, key):
             return self
@@ -80,9 +88,9 @@ class Packet(ABC):
 
     def __truediv__(self, other):
         """
-        Performs layer stacking. Puts right packet to the payload of the left one.
-        If right packet already has the upper layer packet, then checks all upper layers
-        until packet without payload will be found
+        Performs layer stacking. Puts right packet to the payload of the left
+        one. If the right packet already has the upper layer packet, then
+        checks all upper layers until packet without payload will be found
 
         :param other: either a Packet instance or raw bytes
         """

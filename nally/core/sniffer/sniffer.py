@@ -10,7 +10,8 @@ from nally.config import config
 from nally.core.layers.link.ethernet.ethernet_packet import EthernetPacket
 from nally.core.layers.link.ethernet.ethernet_utils import EthernetUtils
 from nally.core.layers.packet import Packet
-from nally.core.utils.platform_specific.platform_specific_utils import PlatformSpecificUtils
+from nally.core.utils.platform_specific.platform_specific_utils \
+    import PlatformSpecificUtils
 
 
 class Sniffer:
@@ -35,14 +36,21 @@ class Sniffer:
         """
         :param if_name: network interface for capturing, if not specified,
             then sniffer will try to pick up the default one
-        :param started_callback: function which will be called after the sniffer initialization
+        :param started_callback: function which will be called after the
+            sniffer initialization
         :param packet_count: number of packets that should be caught
-        :param promiscuous_mode: indicates if sniffer should receive all packets on the LAN, including packets sent to
-            a network address that the network adapter isn't configured to recognize.
+        :param promiscuous_mode: indicates if sniffer should receive all
+            packets on the LAN, including packets sent to a network address
+            that the network adapter isn't configured to recognize.
         :param bpf_filter: packet filter in BPF format
-        :param timeout: specifies timeout in seconds after which sniffer will be terminated
+        :param timeout: specifies timeout in seconds after which sniffer will
+            be terminated
         """
-        self._if_name = if_name if if_name is not None else config.interface_name
+        self._if_name = (
+            if_name
+            if if_name is not None
+            else config.interface_name
+        )
         self._started_callback = started_callback
         self._packet_count = packet_count
         self._promiscuous_mode = promiscuous_mode
@@ -56,7 +64,8 @@ class Sniffer:
         processed_count = 0
         try:
             if self._sniff_socket is None:
-                raise RuntimeError('Sniffer should be used inside context manager')
+                raise RuntimeError("Sniffer should be used "
+                                   "inside context manager")
             termination_date_seconds = None
             if self._started_callback is not None:
                 self._started_callback()
@@ -67,7 +76,8 @@ class Sniffer:
                 if processed_count == self._packet_count:
                     break
                 if self._timeout is not None:
-                    remaining_time_seconds = termination_date_seconds - time.time()
+                    remaining_time_seconds = termination_date_seconds - \
+                                             time.time()
                     if remaining_time_seconds <= 0:
                         break
                 # blocking call, waits until data in socket will be available,
@@ -76,7 +86,9 @@ class Sniffer:
                     # no data in socket available yet
                     continue
                 # data is available
-                packet_addr: tuple = self._sniff_socket.recvfrom(self.BUFFER_SIZE_BYTES)
+                packet_addr: tuple = self._sniff_socket.recvfrom(
+                    self.BUFFER_SIZE_BYTES
+                )
                 raw_packet: bytes = packet_addr[0]
                 if self._filter_packet(raw_packet):
                     # parse Ethernet header and all upper layers if present
@@ -90,8 +102,8 @@ class Sniffer:
 
     def stop(self):
         """
-        Provides ability to gracefully terminate the sniffer (makes sense if sniffer is running in
-        the separate thread)
+        Provides ability to gracefully terminate the sniffer (makes sense if
+        sniffer is running in the separate thread)
         """
         if self._stopped:
             raise RuntimeError("Illegal state: sniffer already terminated")
@@ -109,7 +121,8 @@ class Sniffer:
         Filters packet using the BPF filter, if specified
 
         :param raw_packet: raw network packet
-        :return: True, if packet satisfies the filter conditions, False otherwise
+        :return: True, if packet satisfies the filter conditions,
+            False otherwise
         """
         if self._compiled_filter is not None:
             return self._compiled_filter.filter(raw_packet) != 0
@@ -121,7 +134,10 @@ class Sniffer:
         corresponding sniffer option enabled
         """
         if self._promiscuous_mode:
-            PlatformSpecificUtils.toggle_promiscuous_mode(self._if_name, enable)
+            PlatformSpecificUtils.toggle_promiscuous_mode(
+                self._if_name,
+                enable
+            )
 
     def __enter__(self):
         self._sniff_socket = socket.socket(

@@ -37,6 +37,7 @@ class AbstractPlatformSpecificUtils(ABC):
         Toggles promiscuous mode on network card
 
         :param if_name: network interface name
-        :param enable: if True, promiscuous mode will be enabled, disabled otherwise
+        :param enable: if True, promiscuous mode will be enabled,
+            disabled otherwise
         """
         raise NotImplementedError

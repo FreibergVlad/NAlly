@@ -11,4 +11,6 @@ class TcpUtils:
     def validate_options_length(options):
         length = len(options)
         if length > TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES:
-            raise ValueError(f"Max options length is {TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES} got {length}")
+            raise ValueError(f"Max options length is "
+                             f"{TcpUtils.TCP_OPTIONS_MAX_LENGTH_BYTES} "
+                             f"got {length}")

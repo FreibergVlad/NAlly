@@ -27,7 +27,8 @@ class EthernetPacket(Packet):
         EtherType.ARP: ArpPacket.from_bytes
     }
     """
-    Defines converters to the Internet layer packets based on the value of EtherType field in Ethernet frame
+    Defines converters to the Internet layer packets based on the value of
+    EtherType field in Ethernet frame
     """
 
     LOG = logging.getLogger("EthernetPacket")
@@ -41,11 +42,14 @@ class EthernetPacket(Packet):
         """
         Initializes Ethernet frame instance
 
-        :param dest_mac: destination MAC address, could be either a byte array or hexadecimal string
-        :param source_mac: source MAC address, could be either a byte array or hexadecimal string,
-            if not specified, then local MAC will be picked up
-        :param ether_type: can either be a 2 bytes number which specifies payload size in bytes or EtherType instance
-            which indicates which protocol is encapsulated in the payload of the frame
+        :param dest_mac: destination MAC address, could be either a byte array
+            or hexadecimal string
+        :param source_mac: source MAC address, could be either a byte array or
+            hexadecimal string, if not specified, then local MAC will be
+            picked up
+        :param ether_type: can either be a 2 bytes number which specifies
+            payload size in bytes or EtherType instance which indicates which
+            protocol is encapsulated in the payload of the frame
         """
         super().__init__()
         self.__dest_mac = EthernetUtils.validate_mac(dest_mac)
@@ -63,9 +67,15 @@ class EthernetPacket(Packet):
 
     @staticmethod
     def from_bytes(bytes_packet: bytes):
-        header_bytes = bytes_packet[:EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES]
-        payload_bytes = EthernetUtils.validate_payload(bytes_packet[EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES:])
-        packet_fields = struct.unpack(EthernetPacket.ETHERNET_PACKET_FORMAT, header_bytes)
+        header_bytes = bytes_packet[
+                       :EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES]
+        payload_bytes = EthernetUtils.validate_payload(
+            bytes_packet[EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES:]
+        )
+        packet_fields = struct.unpack(
+            EthernetPacket.ETHERNET_PACKET_FORMAT,
+            header_bytes
+        )
         dest_mac = packet_fields[0]
         source_mac = packet_fields[1]
         ether_type = packet_fields[2]
@@ -73,7 +83,9 @@ class EthernetPacket(Packet):
         if len(payload_bytes) == 0:
             return ethernet_packet
         # try to find appropriate converter based on EtherType field
-        internet_layer_converter = EthernetPacket.INTERNET_LAYER_CONVERTERS.get(ether_type)
+        internet_layer_converter = EthernetPacket \
+            .INTERNET_LAYER_CONVERTERS \
+            .get(ether_type)
         if internet_layer_converter is None:
             EthernetPacket.LOG.warning(
                 f"Can't find converter to internet layer packet. "
@@ -108,6 +120,11 @@ class EthernetPacket(Packet):
         dest_mac = self.dest_mac.hex()
         src_mac = self.source_mac.hex()
         ether_type = hex(self.ether_type)
-        ether_type_name = self.ether_type.name if isinstance(self.ether_type, EtherType) else "length"
-        return f"Ethernet(dest_mac={dest_mac}, src_mac={src_mac}, " \
+        ether_type_name = (
+            self.ether_type.name
+            if isinstance(self.ether_type, EtherType)
+            else "length"
+        )
+        return f"Ethernet(dest_mac={dest_mac}, " \
+               f"src_mac={src_mac}, " \
                f"ether_type={ether_type} ({ether_type_name})) "

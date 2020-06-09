@@ -5,9 +5,11 @@ import nally.core.layers.transport.tcp.tcp_packet as tcp_packet
 import nally.core.layers.transport.udp.udp_packet as udp_packet
 from nally.config import config
 
-from nally.core.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
+from nally.core.layers.inet.ip.ip_diff_service_values \
+    import IpDiffServiceValues
 from nally.core.layers.inet.ip.ip_ecn_values import IpEcnValues
-from nally.core.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
+from nally.core.layers.inet.ip.ip_fragmentation_flags \
+    import IpFragmentationFlags
 from nally.core.layers.inet.ip.ip_utils import IpUtils
 from nally.core.layers.packet import Packet
 from nally.core.utils.utils import Utils
@@ -64,14 +66,17 @@ class IpPacket(Packet):
         Initializes IPv4 packet instance
 
         :param dest_addr_str: string representation of destination IP address
-        :param source_addr_str: string representation of source IP address, if not specified,
-            then local address will be picked up
+        :param source_addr_str: string representation of source IP address,
+            if not specified, then local address will be picked up
         :param dscp: DSCP field, instance of IpDiffServiceValues enum
         :param ecn: ECN field, instance of IpEcnValues enum
-        :param identification: unique identifier of the fragment in a single IP datagram.
-            Should be a 16 bits integer. If None, then randomly generated value will be used
-        :param flags: fragmentation flags, instance of IpFragmentationFlags, DF by default
-        :param fragment_offset: Fragment Offset field, 13 bits integer, 0 by default
+        :param identification: unique identifier of the fragment in a single
+            IP datagram. Should be a 16 bits integer. If None, then randomly
+            generated value will be used
+        :param flags: fragmentation flags, instance of IpFragmentationFlags,
+            DF by default
+        :param fragment_offset: Fragment Offset field, 13 bits integer,
+            0 by default
         :param ttl: TTL field, defines packet lifetime, 64 by default
         :param protocol: Protocol field, defines the protocol used in the data
             portion of the IP datagram. Full list of protocols available
@@ -82,15 +87,21 @@ class IpPacket(Packet):
         self.__dest_addr = socket.inet_aton(dest_addr_str)
         self.__dscp = dscp
         self.__ecn = ecn
-        self.__identification = IpUtils.validate_or_gen_packet_id(identification)
+        self.__identification = IpUtils.validate_or_gen_packet_id(
+            identification
+        )
         self.__flags = flags
-        self.__fragment_offset = IpUtils.validate_fragment_offset(fragment_offset)
+        self.__fragment_offset = IpUtils.validate_fragment_offset(
+            fragment_offset
+        )
         self.__ttl = ttl
         self.__protocol = protocol
 
     def to_bytes(self) -> bytes:
-        # fragmentation flags takes first 3 bits, next 13 bits is fragment offset
-        flags_fragment_offset = self.__flags.flags << 13 | self.__fragment_offset
+        # fragmentation flags takes first 3 bits,
+        # next 13 bits is fragment offset
+        flags_fragment_offset = self.__flags.flags << 13 | \
+                                self.__fragment_offset
 
         # DSCP value takes first 6 bits, the next 2 ones is ECN
         dscp_ecn = self.__dscp << 2 | self.__ecn
@@ -111,7 +122,12 @@ class IpPacket(Packet):
         # allocate 20 bytes buffer to put header in
         header_bytes = bytearray(IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES)
         # pack header without checksum to the buffer
-        struct.pack_into(self.IP_V4_HEADER_FORMAT, header_bytes, 0, *header_fields)
+        struct.pack_into(
+            self.IP_V4_HEADER_FORMAT,
+            header_bytes,
+            0,
+            *header_fields
+        )
 
         # calculate checksum
         checksum_bytes = Utils.calc_checksum(header_bytes)
@@ -126,10 +142,14 @@ class IpPacket(Packet):
     def from_bytes(packet_bytes: bytes):
         header_bytes = packet_bytes[:IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES]
         payload_bytes = packet_bytes[IpUtils.IP_V4_MAX_HEADER_LENGTH_BYTES:]
-        header_fields = struct.unpack(IpPacket.IP_V4_HEADER_FORMAT, header_bytes)
+        header_fields = struct.unpack(
+            IpPacket.IP_V4_HEADER_FORMAT,
+            header_bytes
+        )
 
-        # we don't extract ver_ihl, total_length, checksum fields (0, 2, 7 indices)
-        # since they will be calculated after IpPacket instantiating
+        # we don't extract ver_ihl, total_length, checksum fields
+        # (0, 2, 7 indices) since they will be calculated after IpPacket
+        # instantiating
         dscp_ecn = header_fields[1]
         identification = header_fields[3]
         flags_fragment_offset = header_fields[4]
@@ -138,7 +158,8 @@ class IpPacket(Packet):
         source_addr = socket.inet_ntoa(header_fields[8])
         dest_addr = socket.inet_ntoa(header_fields[9])
 
-        dscp = IpDiffServiceValues(dscp_ecn >> 2)  # take first 6 bits dropping last 2 bits
+        # take first 6 bits dropping last 2 bits
+        dscp = IpDiffServiceValues(dscp_ecn >> 2)
         ecn = IpEcnValues(dscp_ecn & 3)  # take last 2 bits
 
         # take first 3 bits dropping last 13 bits
@@ -161,7 +182,9 @@ class IpPacket(Packet):
         if len(payload_bytes) == 0:
             return ip_packet
         # try to find appropriate converter based on protocol field
-        transport_layer_converter = IpPacket.TRANSPORT_LAYER_CONVERTERS.get(protocol)
+        transport_layer_converter = IpPacket\
+            .TRANSPORT_LAYER_CONVERTERS\
+            .get(protocol)
         if transport_layer_converter is None:
             IpPacket.LOG.warning(
                 f"Can't find converter to transport layer packet. "
@@ -237,7 +260,13 @@ class IpPacket(Packet):
         return False
 
     def __str__(self) -> str:
-        return f"IP(dest_addr={self.dest_addr}, src_addr={self.source_addr}, " \
-               f"dscp={self.dscp}, ecn={self.ecn}, " \
-               f"length={self.total_length}, id={self.id}, flags=({self.flags}), " \
-               f"frag_offset={self.frag_offset}, ttl={self.ttl}, protocol={self.protocol})"
+        return f"IP(dest_addr={self.dest_addr}, " \
+               f"src_addr={self.source_addr}, " \
+               f"dscp={self.dscp}, " \
+               f"ecn={self.ecn}, " \
+               f"length={self.total_length}, " \
+               f"id={self.id}, " \
+               f"flags=({self.flags}), " \
+               f"frag_offset={self.frag_offset}, " \
+               f"ttl={self.ttl}, " \
+               f"protocol={self.protocol})"

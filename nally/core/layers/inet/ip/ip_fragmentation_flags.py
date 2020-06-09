@@ -16,8 +16,10 @@ class IpFragmentationFlags(BitFlags):
         """
         Initialises IP fragmentation flags
 
-        :param bool mf: when set, then indicates that the packet contains more fragments
-        :param bool df: when set, then indicates that the packet cannot be fragmented for transmission
+        :param bool mf: when set, then indicates that the packet contains
+            more fragments
+        :param bool df: when set, then indicates that the packet cannot be
+            fragmented for transmission
         """
         super().__init__()
         self.set_flag(self.MF, mf)

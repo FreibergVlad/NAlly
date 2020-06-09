@@ -7,8 +7,9 @@ from nally.core.layers.link.proto_type import EtherType
 
 class ArpHardwareType(IntEnum):
     """
-    Stores possible values for 'HTYPE' field in ARP frame, used to specify the network link protocol type
-    List of possible values described at https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
+    Stores possible values for 'HTYPE' field in ARP frame, used to specify
+    the network link protocol type. List of possible values described at
+    https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
     """
 
     # ====== New supported protocols should be added below ======
@@ -44,14 +45,16 @@ class ArpUtils:
         ArpHardwareType.ETHERNET: EthernetUtils.validate_mac
     }
     """
-    Defines validators for SHA, THA fields in accordance with HTYPE field values
+    Defines validators for SHA, THA fields in
+    accordance with HTYPE field values
     """
 
     PROTO_ADDR_VALIDATORS = {
         EtherType.IPV4: IpUtils.validate_and_pack_ip4_addr
     }
     """
-    Defines validators for SPA, TPA fields in accordance with PTYPE field values
+    Defines validators for SPA, TPA fields
+    in accordance with PTYPE field values
     """
 
     @staticmethod

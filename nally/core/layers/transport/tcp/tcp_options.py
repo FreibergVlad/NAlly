@@ -16,7 +16,7 @@ class TcpOptions:
         * Selective Acknowledgement permitted
         * Selective Acknowledgement
         * Timestamps
-    See https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1 for mode details
+    See https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1 for mode details # noqa
     """
 
     END_OF_OPTIONS = "EOL"
@@ -31,7 +31,8 @@ class TcpOptions:
     # Storage of supported options definitions. Option definition is a
     # tuple with min size 1 and max 3 fields:
     #   * Option kind
-    #   * Option length (includes 1 byte of 'kind' field and 1 byte of 'length' field itself)
+    #   * Option length (includes 1 byte of 'kind' field and 1 byte of
+    #       'length' field itself)
     #   * Format string (may be None for variable length fields)
     #
     SUPPORTED_OPTIONS: Dict[str, Tuple[int, int, str]] = {
@@ -57,10 +58,13 @@ class TcpOptions:
     def __init__(self, options: list = None):
         """
         Initialises TcpOptions instance
-        :param list options: option list, list items can be in the following format:
-            * String. For options that don't have 'length' and 'value' fields (like NOP)
+        :param list options: option list, list items can be in the
+        following format:
+            * String. For options that don't have 'length' and 'value'
+                fields (like NOP)
             * Tuple[str, int]. For options with only one value
-            * Tuple[str, list]. For options with multiple values (like TIMESTAMPS, SACK etc)
+            * Tuple[str, list]. For options with multiple values
+                (like TIMESTAMPS, SACK etc)
         """
         self.__options = []
         if options is None:
@@ -68,27 +72,38 @@ class TcpOptions:
         for option in options:
             if isinstance(option, tuple):
                 if len(option) != 2:
-                    raise ValueError(f"Invalid option {option}. Should a tuple with 2 elements (name, value)")
+                    raise ValueError(f"Invalid option "
+                                     f"{option}. Should a tuple with 2 "
+                                     f"elements (name, value)")
                 option_name = option[0]
                 if not isinstance(option_name, str):
-                    raise ValueError(f"Invalid option name {option_name}. Should be a string")
+                    raise ValueError(f"Invalid option name "
+                                     f"{option_name}. Should be a string")
                 option_value = option[1]
                 if isinstance(option_value, list):
                     self.__options.append(option)
                 elif isinstance(option_value, int):
                     self.__options.append((option_name, [option_value]))
                 else:
-                    raise ValueError(f"Invalid option value {option_value}. Should either a 'int' or a 'list[int]'")
+                    raise ValueError(f"Invalid option value "
+                                     f"{option_value}. Should either a "
+                                     f"'int' or a 'list[int]'")
             elif isinstance(option, str):
                 self.__options.append((option, None))
             else:
-                raise ValueError(f"Invalid option {option}. Should be either a 'Tuple[str, list|int]' or a 'str'")
+                raise ValueError(f"Invalid option "
+                                 f"{option}. "
+                                 f"Should be either a 'Tuple[str, list|int]' "
+                                 f"or a 'str'")
 
     def to_bytes(self) -> bytes:
         """
-        Converts options to the binary format ready to be sent over the network. Performs padding if necessary
+        Converts options to the binary format ready to be sent over the
+        network. Performs padding if necessary
+
         :return: byte array representation of options
-        :raises: ValueError: if options length is more that max allowed value (40 bytes)
+        :raises: ValueError: if options length is more that max allowed value
+            (40 bytes)
         """
         options_bytes = bytearray()
         for option in self.__options:
@@ -107,8 +122,8 @@ class TcpOptions:
             opt_format: str = self.SUPPORTED_OPTIONS[opt_name][2]
             if opt_name == self.SACK:  # SACK option has variable length
                 # calculating 'length' field, consider that each SACK block
-                # is 4 bytes unsigned integer. Also include 1 byte of 'option kind'
-                # field and 1 byte of 'length' field itself
+                # is 4 bytes unsigned integer. Also include 1 byte of
+                # 'option kind' field and 1 byte of 'length' field itself
                 opt_length: int = len(opt_values) * 4 + 2
                 opt_format: str = f"!{len(opt_values)}I"
             option_bytes = bytearray([opt_kind, opt_length])
@@ -146,7 +161,8 @@ class TcpOptions:
             option_length = options_bytes[index + 1]
             if option_length < 2:
                 raise ValueError(f"Invalid option length {option_length}")
-            if option_length == 2:  # option length 2 means that no value is present
+            # option length 2 means that no value is present
+            if option_length == 2:
                 index += 2
                 options.append(option_name)
                 continue
@@ -155,9 +171,13 @@ class TcpOptions:
             if option_name == TcpOptions.SACK:
                 # calculate number of 4-bytes words
                 option_format: str = f"!{len(option_value_bytes) // 4}I"
-            option_value: tuple = struct.unpack_from(option_format, option_value_bytes)
+            option_value: tuple = struct.unpack_from(
+                option_format,
+                option_value_bytes
+            )
             if len(option_value) == 0:
-                raise ValueError(f"Option value is empty. Option name: {option_name}")
+                raise ValueError(f"Option value is empty. Option name: "
+                                 f"{option_name}")
             elif len(option_value) == 1:
                 options.append((option_name, option_value[0]))
             else:

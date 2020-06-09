@@ -12,8 +12,8 @@ class EthernetUtils:
         """
         Validates and returns MAC address
 
-        :param mac: either a string representation of MAC address (with or without ':' delimiter),
-            or the bytes one
+        :param mac: either a string representation of MAC address
+            (with or without ':' delimiter), or the bytes one
         :return: validated MAC address
         :raises: ValueError: if passed value isn't valid MAC address
         """
@@ -26,7 +26,8 @@ class EthernetUtils:
     @staticmethod
     def validate_mac_length(mac: bytes) -> bytes:
         if len(mac) != EthernetUtils.MAC_LENGTH_BYTES:
-            raise ValueError(f"MAC address should be {EthernetUtils.MAC_LENGTH_BYTES} bytes length")
+            raise ValueError(f"MAC address should be "
+                             f"{EthernetUtils.MAC_LENGTH_BYTES} bytes length")
         return mac
 
     @staticmethod

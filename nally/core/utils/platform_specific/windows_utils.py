@@ -1,4 +1,5 @@
-from nally.core.utils.platform_specific.abstract_platform_specific_utils import AbstractPlatformSpecificUtils
+from nally.core.utils.platform_specific.abstract_platform_specific_utils \
+    import AbstractPlatformSpecificUtils
 
 
 class WindowsUtils(AbstractPlatformSpecificUtils):
