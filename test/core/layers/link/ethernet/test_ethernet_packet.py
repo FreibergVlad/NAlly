@@ -262,11 +262,7 @@ class TestEthernetPacket(TestCase):
             protocol=socket.IPPROTO_UDP
         )
 
-        udp_packet = UdpPacket(
-            dest_port=39237,
-            source_port=443,
-            payload=bytes.fromhex(app_payer_payload)
-        )
+        udp_packet = UdpPacket(dest_port=39237, source_port=443) / bytes.fromhex(app_payer_payload)
 
         packet = ethernet_packet / ip_packet / udp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())

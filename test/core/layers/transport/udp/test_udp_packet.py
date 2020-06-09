@@ -42,11 +42,7 @@ PACKET_DUMP_2 = "d06504aa0079a351" + PACKET_DUMP_2_PAYLOAD
 class TestUdpPacket(TestCase):
 
     def test_to_bytes(self):
-        udp_packet1 = UdpPacket(
-            source_port=55380,
-            dest_port=53,
-            payload=bytes.fromhex(PACKET_DUMP_1_PAYLOAD)
-        )
+        udp_packet1 = UdpPacket(source_port=55380, dest_port=53) / bytes.fromhex(PACKET_DUMP_1_PAYLOAD)
         udp_packet1 = IpPacket(
             source_addr_str="192.168.1.32",
             dest_addr_str="192.168.1.1",
@@ -54,11 +50,7 @@ class TestUdpPacket(TestCase):
         ) / udp_packet1
         self.__test_udp_packet(PACKET_DUMP_1, udp_packet1)
 
-        udp_packet2 = UdpPacket(
-            source_port=53349,
-            dest_port=1194,
-            payload=bytes.fromhex(PACKET_DUMP_2_PAYLOAD)
-        )
+        udp_packet2 = UdpPacket(source_port=53349, dest_port=1194) / bytes.fromhex(PACKET_DUMP_2_PAYLOAD)
         udp_packet2 = IpPacket(
             source_addr_str="192.168.1.32",
             dest_addr_str="217.38.170.114",
