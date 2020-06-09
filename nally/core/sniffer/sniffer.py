@@ -28,6 +28,7 @@ class Sniffer:
             self,
             if_name: str = None,
             started_callback: callable = None,
+            predicate_filter: callable = None,
             packet_count: int = None,
             promiscuous_mode: bool = True,
             bpf_filter: str = "",
@@ -38,6 +39,9 @@ class Sniffer:
             then sniffer will try to pick up the default one
         :param started_callback: function which will be called after the
             sniffer initialization
+        :param predicate_filter: bool function which will be called to
+            determine if packet should be processed. Note: predicate will
+            be applied after the BPF filter if one presents
         :param packet_count: number of packets that should be caught
         :param promiscuous_mode: indicates if sniffer should receive all
             packets on the LAN, including packets sent to a network address
@@ -52,6 +56,7 @@ class Sniffer:
             else config.interface_name
         )
         self._started_callback = started_callback
+        self._predicate_filter = predicate_filter
         self._packet_count = packet_count
         self._promiscuous_mode = promiscuous_mode
         self._bpf_filter = bpf_filter
@@ -86,13 +91,22 @@ class Sniffer:
                     # no data in socket available yet
                     continue
                 # data is available
-                packet_addr: tuple = self._sniff_socket.recvfrom(
+                packet_address: tuple = self._sniff_socket.recvfrom(
                     self.BUFFER_SIZE_BYTES
                 )
-                raw_packet: bytes = packet_addr[0]
+                raw_packet: bytes = packet_address[0]
+                # apply BPF filter
                 if self._filter_packet(raw_packet):
                     # parse Ethernet header and all upper layers if present
                     ethernet_packet = EthernetPacket.from_bytes(raw_packet)
+                    # apply user-defined predicate if presents
+                    predicate_result: bool = (
+                        self._predicate_filter(ethernet_packet)
+                        if self._predicate_filter is not None
+                        else True
+                    )
+                    if not predicate_result:
+                        continue
                     processed_count += 1
                     yield ethernet_packet
             return processed_count
