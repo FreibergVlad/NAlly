@@ -1,8 +1,10 @@
 import socket
 from unittest import TestCase
 
-from nally.core.layers.inet.ip.ip_diff_service_values import IpDiffServiceValues
-from nally.core.layers.inet.ip.ip_fragmentation_flags import IpFragmentationFlags
+from nally.core.layers.inet.ip.ip_diff_service_values \
+    import IpDiffServiceValues
+from nally.core.layers.inet.ip.ip_fragmentation_flags \
+    import IpFragmentationFlags
 from nally.core.layers.inet.ip.ip_packet import IpPacket
 from nally.core.layers.link.arp.arp_packet import ArpPacket
 from nally.core.layers.link.arp.arp_utils import ArpHardwareType, ArpOperation
@@ -97,7 +99,8 @@ TCP_IP_PAYLOAD_TEST_CONTEXT = {
     #   NOP
     #   Timestamps = 654701382 and 3921945890
     #
-    "TCP_PAYLOAD": "01bbdaaa9851d8d84acd45df8010000a07c200000101080a2705f346e9c42522"
+    "TCP_PAYLOAD": "01bbdaaa9851d8d84acd45df8010000a07"
+                   "c200000101080a2705f346e9c42522"
 }
 
 UDP_IP_PAYLOAD_TEST_CONTEXT = {
@@ -170,7 +173,10 @@ class TestEthernetPacket(TestCase):
 
         ethernet_arp = packet / arp_payload
         self.assertEqual(packet_hex, ethernet_arp.to_bytes().hex())
-        self.assertEqual(ethernet_arp, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertEqual(
+            ethernet_arp,
+            EthernetPacket.from_bytes(bytes.fromhex(packet_hex))
+        )
         self.assertTrue(EthernetPacket in ethernet_arp)
         self.assertTrue(ArpPacket in ethernet_arp)
         self.assertEqual(arp_payload, ethernet_arp[ArpPacket])
@@ -199,7 +205,10 @@ class TestEthernetPacket(TestCase):
 
         ethernet_ip = packet / ip_packet
         self.assertEqual(packet_hex, ethernet_ip.to_bytes().hex())
-        self.assertEqual(ethernet_ip, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertEqual(
+            ethernet_ip,
+            EthernetPacket.from_bytes(bytes.fromhex(packet_hex))
+        )
         self.assertTrue(EthernetPacket in ethernet_ip)
         self.assertTrue(IpPacket in ethernet_ip)
         self.assertEqual(ip_packet, ethernet_ip[IpPacket])
@@ -210,7 +219,10 @@ class TestEthernetPacket(TestCase):
         tcp_payload_hex = TCP_IP_PAYLOAD_TEST_CONTEXT["TCP_PAYLOAD"]
         packet_hex = ethernet_header_hex + ip_payload_hex + tcp_payload_hex
 
-        ethernet_packet = EthernetPacket(dest_mac="e0:d5:5e:21:b0:cb", source_mac="00:7e:95:02:61:42")
+        ethernet_packet = EthernetPacket(
+            dest_mac="e0:d5:5e:21:b0:cb",
+            source_mac="00:7e:95:02:61:42"
+        )
         self.assertEqual(ethernet_header_hex, ethernet_packet.to_bytes().hex())
 
         ip_packet = IpPacket(
@@ -237,7 +249,10 @@ class TestEthernetPacket(TestCase):
 
         packet = ethernet_packet / ip_packet / tcp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())
-        self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertEqual(
+            packet,
+            EthernetPacket.from_bytes(bytes.fromhex(packet_hex))
+        )
         self.assertTrue(EthernetPacket in packet)
         self.assertTrue(IpPacket in packet)
         self.assertTrue(TcpPacket in packet)
@@ -247,9 +262,13 @@ class TestEthernetPacket(TestCase):
         ip_payload_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["IP_PAYLOAD"]
         udp_payload_hex = UDP_IP_PAYLOAD_TEST_CONTEXT["UDP_PAYLOAD"]
         app_payer_payload = UDP_IP_PAYLOAD_TEST_CONTEXT["APP_LAYER_PAYLOAD"]
-        packet_hex = ethernet_header_hex + ip_payload_hex + udp_payload_hex + app_payer_payload
+        packet_hex = (ethernet_header_hex + ip_payload_hex
+                      + udp_payload_hex + app_payer_payload)
 
-        ethernet_packet = EthernetPacket(dest_mac="0c:84:dc:a6:bf:c1", source_mac="34:da:b7:87:d5:34")
+        ethernet_packet = EthernetPacket(
+            dest_mac="0c:84:dc:a6:bf:c1",
+            source_mac="34:da:b7:87:d5:34"
+        )
         self.assertEqual(ethernet_header_hex, ethernet_packet.to_bytes().hex())
 
         ip_packet = IpPacket(
@@ -262,11 +281,17 @@ class TestEthernetPacket(TestCase):
             protocol=socket.IPPROTO_UDP
         )
 
-        udp_packet = UdpPacket(dest_port=39237, source_port=443) / bytes.fromhex(app_payer_payload)
+        udp_packet = UdpPacket(
+            dest_port=39237,
+            source_port=443
+        ) / bytes.fromhex(app_payer_payload)
 
         packet = ethernet_packet / ip_packet / udp_packet
         self.assertEqual(packet_hex, packet.to_bytes().hex())
-        self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(packet_hex)))
+        self.assertEqual(
+            packet,
+            EthernetPacket.from_bytes(bytes.fromhex(packet_hex))
+        )
         self.assertTrue(EthernetPacket in packet)
         self.assertTrue(IpPacket in packet)
         self.assertTrue(UdpPacket in packet)
@@ -280,4 +305,31 @@ class TestEthernetPacket(TestCase):
             source_mac="52:54:00:46:cd:26"
         )
         self.assertEqual(ethernet_header_hex, packet.to_bytes().hex())
-        self.assertEqual(packet, EthernetPacket.from_bytes(bytes.fromhex(ethernet_header_hex)))
+        self.assertEqual(
+            packet,
+            EthernetPacket.from_bytes(bytes.fromhex(ethernet_header_hex))
+        )
+
+    def test_is_response(self):
+        packet1 = EthernetPacket(
+            dest_mac="01:00:5e:67:00:0a",
+            source_mac="52:54:00:46:cd:26"
+        )
+        response1 = EthernetPacket(
+            dest_mac="52:54:00:46:cd:26",
+            source_mac="01:00:5e:67:00:0a"
+        )
+        self.assertTrue(response1.is_response(packet1))
+
+        # EtherType mismatch
+        packet2 = EthernetPacket(
+            dest_mac="01:00:5e:67:00:0a",
+            source_mac="52:54:00:46:cd:26",
+            ether_type=EtherType.IPV4
+        )
+        response2 = EthernetPacket(
+            dest_mac="52:54:00:46:cd:26",
+            source_mac="01:00:5e:67:00:0a",
+            ether_type=EtherType.IPV6
+        )
+        self.assertFalse(response2.is_response(packet2))

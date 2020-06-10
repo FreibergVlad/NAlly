@@ -67,8 +67,7 @@ class EthernetPacket(Packet):
 
     @staticmethod
     def from_bytes(bytes_packet: bytes):
-        header_bytes = bytes_packet[
-                       :EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES]
+        header_bytes = bytes_packet[:EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES] # noqa E501
         payload_bytes = EthernetUtils.validate_payload(
             bytes_packet[EthernetPacket.ETHERNET_HEADER_LENGTH_BYTES:]
         )
@@ -95,6 +94,21 @@ class EthernetPacket(Packet):
             return ethernet_packet
         internet_layer = internet_layer_converter(payload_bytes)
         return ethernet_packet / internet_layer
+
+    def is_response(self, packet: Packet) -> bool:
+        if EthernetPacket not in packet:
+            return False
+        ethernet_layer: EthernetPacket = packet[EthernetPacket]
+        # check EtherType field
+        if self.ether_type != ethernet_layer.ether_type:
+            return False
+        # here we know that 'self' is a valid response on Ethernet layer,
+        # now delegate further processing to the upper layer if one exists
+        return (
+            self.upper_layer.is_response(packet)
+            if self.upper_layer is not None
+            else True
+        )
 
     @property
     def dest_mac(self):
