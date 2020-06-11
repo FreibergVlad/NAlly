@@ -118,6 +118,23 @@ class ArpPacket(Packet):
             target_proto_address=target_proto_addr
         )
 
+    def is_response(self, packet: Packet) -> bool:
+        if ArpPacket not in packet:
+            return False
+        arp_layer: ArpPacket = packet[ArpPacket]
+        if self.operation != ArpOperation.OP_REPLY \
+                or arp_layer.operation != ArpOperation.OP_REQUEST:
+            return False
+        if self.proto_type != arp_layer.proto_type:
+            return False
+        if self.proto_len != arp_layer.proto_len:
+            return False
+        if self.sender_proto_addr != arp_layer.target_proto_addr:
+            return False
+        if self.target_proto_addr != arp_layer.sender_proto_addr:
+            return False
+        return True
+
     @property
     def hw_type(self) -> ArpHardwareType:
         return self.__hardware_type

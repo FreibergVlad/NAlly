@@ -60,3 +60,24 @@ class TestArpPacket(TestCase):
         arp_bytes = arp_packet.to_bytes()
         self.assertEqual(PACKET_DUMP_2, arp_bytes.hex())
         self.assertEqual(arp_packet, ArpPacket.from_bytes(arp_bytes))
+
+    def test_is_response(self):
+        arp_request = ArpPacket(
+            hardware_type=ArpHardwareType.ETHERNET,
+            protocol_type=EtherType.IPV4,
+            operation=ArpOperation.OP_REQUEST,
+            sender_hw_address="b0 6e bf c7 e6 ba",
+            sender_proto_address="10.10.128.39",
+            target_hw_address="ff ff ff ff ff ff",
+            target_proto_address="10.10.128.44"
+        )
+        arp_response = ArpPacket(
+            hardware_type=ArpHardwareType.ETHERNET,
+            protocol_type=EtherType.IPV4,
+            operation=ArpOperation.OP_REPLY,
+            sender_hw_address="00 7e 95 02 61 42",
+            sender_proto_address="10.10.128.44",
+            target_hw_address="e0 d5 5e 21 b0 cb",
+            target_proto_address="10.10.128.39"
+        )
+        self.assertTrue(arp_response.is_response(arp_request))
