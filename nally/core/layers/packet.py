@@ -1,4 +1,6 @@
 import copy
+import logging
+
 from abc import ABC, abstractmethod
 
 
@@ -8,9 +10,13 @@ class Packet(ABC):
     implementation
     """
 
+    field_definitions = []
+    logger = logging.getLogger("Packet")
+
     def __init__(self):
         self._under_layer = None
         self._upper_layer = None
+        self._field_values = {}
 
     @abstractmethod
     def to_bytes(self):
@@ -68,6 +74,10 @@ class Packet(ABC):
         else:
             raise ValueError("Under layer packet should be Packet instance")
 
+    @property
+    def fields(self) -> dict:
+        return copy.deepcopy(self._field_values)
+
     def clone(self):
         return copy.deepcopy(self)
 
@@ -109,3 +119,10 @@ class Packet(ABC):
         other_copy = other.clone()
         self_copy.add_payload(other_copy)
         return self_copy
+
+    def __eq__(self, other) -> bool:
+        if other is None or self.__class__ != other.__class__:
+            return False
+        if self.fields != other.fields:
+            return False
+        return self.upper_layer == other.upper_layer

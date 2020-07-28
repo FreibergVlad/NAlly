@@ -13,6 +13,7 @@ from nally.core.layers.inet.ip.ip_fragmentation_flags \
 from nally.core.layers.inet.ip.ip_utils import IpUtils
 from nally.core.layers.packet import Packet
 from nally.core.utils.utils import Utils
+from nally.core.layers.fields import BitField, EnumBitField, ShortField, BitFlagsField
 
 
 class IpPacket(Packet):
@@ -21,6 +22,26 @@ class IpPacket(Packet):
 
     Note: implementation doesn't support 'Options' field
     """
+
+    field_definitions = [
+        BitField(name="version", default_value=4, size=4),
+        BitField(name="ihl", default_value=5, size=4),
+        EnumBitField(
+            name="dscp",
+            default_value=IpDiffServiceValues.DEFAULT,
+            size=6,
+            enum=IpDiffServiceValues
+        ),
+        EnumBitField(
+            name="ecn",
+            default_value=IpEcnValues.NON_ECT,
+            size=3,
+            enum=IpEcnValues
+        ),
+        ShortField(name="total_length", default_value=20),
+        ShortField(name="id"),
+        BitFlagsField(name="flags", size=3, flags=IpFragmentationFlags)
+    ]
 
     IP_V4_HEADER_FORMAT = "!BBHHHBBH4s4s"
     """
